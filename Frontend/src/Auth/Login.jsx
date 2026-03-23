@@ -1,617 +1,317 @@
 import React, { useState, useRef, useEffect } from 'react';
-import NavBarPage from "../WelcomePages/NavBarpage"
-import FooterPage from "../WelcomePages/FooterPage"
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 
+const SERIF = "'Cormorant Garamond',Georgia,serif";
+const SANS  = "'Lato',system-ui,sans-serif";
+
 const LoginPage = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData]       = useState({ email: '', password: '' });
   const [captchaText, setCaptchaText] = useState('');
   const [userCaptcha, setUserCaptcha] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [showPass, setShowPass]       = useState(false);
+  const [isLoading, setIsLoading]     = useState(false);
+  const [errors, setErrors]           = useState({});
   const [successMessage, setSuccessMessage] = useState('');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [focused, setFocused]         = useState('');
   const canvasRef = useRef(null);
 
-  // Check if user is already authenticated
-  const checkAuthStatus = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-
-      if (!token) {
-        setIsCheckingAuth(false);
-        return;
-      }
-
-      // Verify token with backend and get user role
-      const response = await axios.get("/api/check-auth", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (response.data.authenticated) {
-        // Redirect based on user role
-        const userRole = response.data.user?.role;
-        if (userRole === 'admin') {
-          window.location.href = "/dashboard/admin";
-        } else {
-          window.location.href = "/dashboard/home";
-        }
-        return;
-      }
-      // If backend says not authenticated
-      localStorage.removeItem("authToken");
-    } catch (error) {
-      // Token invalid / expired / route incorrect
-      console.log("Auth check failed:", error);
-      localStorage.removeItem("authToken");
-    } finally {
-      setIsCheckingAuth(false);
-    }
-  };
-
-  // Check for Google authentication callback
-  const checkGoogleAuth = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const googleToken = urlParams.get('token');
-    const userData = urlParams.get('user');
-    const googleError = urlParams.get('error');
-    
-    if (googleToken && userData) {
-      try {
-        // ✅ FIX: Store Google auth token in localStorage
-        localStorage.setItem('authToken', googleToken);
-        
-        // Parse user data to get role
-        const user = JSON.parse(decodeURIComponent(userData));
-        const userRole = user.role;
-        
-        // ✅ FIX: Store user data in localStorage for future use
-        localStorage.setItem('userData', JSON.stringify(user));
-        
-        // ✅ FIX: Clean URL parameters after storing
-        window.history.replaceState({}, document.title, window.location.pathname);
-        
-        // Redirect based on role from Google auth
-        if (userRole === 'admin') {
-          window.location.href = '/dashboard/admin';
-        } else {
-          window.location.href = '/dashboard/home';
-        }
-        return;
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-        setErrors({ general: 'Failed to process authentication data' });
-      }
-    }
-    
-    if (googleError) {
-      setErrors({ general: `Google authentication failed: ${googleError}` });
-      // Clean URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  };
-
-  // Check for token in URL parameters (for regular login redirects)
-  const checkUrlToken = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    const userData = urlParams.get('user');
-    
-    if (token && userData) {
-      try {
-        // ✅ FIX: Store token from URL parameters
-        localStorage.setItem('authToken', token);
-        
-        // Parse and store user data
-        const user = JSON.parse(decodeURIComponent(userData));
-        localStorage.setItem('userData', JSON.stringify(user));
-        
-        // Clean URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-        
-        // Redirect based on role
-        if (user.role === 'admin') {
-          window.location.href = '/dashboard/admin';
-        } else {
-          window.location.href = '/dashboard/home';
-        }
-      } catch (error) {
-        console.error("Error processing URL token:", error);
-      }
-    }
-  };
-
-  // Initialize auth checks and CAPTCHA
+  /* ── auth checks ── */
   useEffect(() => {
     checkAuthStatus();
     checkGoogleAuth();
-    checkUrlToken(); // ✅ ADDED: Check for token in URL
+    checkUrlToken();
     generateCaptcha();
   }, []);
 
-  // Generate CAPTCHA
-  const generateCaptcha = () => {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < 4; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    setCaptchaText(result);
-    setErrors(prev => ({ ...prev, captcha: '' }));
+  const checkAuthStatus = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) { setIsCheckingAuth(false); return; }
+      const res = await axios.get('/api/check-auth', { headers: { Authorization: `Bearer ${token}` } });
+      if (res.data.authenticated) {
+        window.location.href = res.data.user?.role === 'admin' ? '/dashboard/admin' : '/dashboard/home';
+        return;
+      }
+      localStorage.removeItem('authToken');
+    } catch { localStorage.removeItem('authToken'); }
+    finally { setIsCheckingAuth(false); }
   };
 
-  // Draw CAPTCHA on canvas
-  useEffect(() => {
-    if (canvasRef.current && captchaText) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Musical gradient background
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      gradient.addColorStop(0, '#8B5CF6');
-      gradient.addColorStop(1, '#06B6D4');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Add musical note symbols as noise
-      for (let i = 0; i < 20; i++) {
-        ctx.fillStyle = `rgba(255, 255, 255, 0.1)`;
-        ctx.font = '12px Arial';
-        ctx.fillText('♪', Math.random() * canvas.width, Math.random() * canvas.height);
-      }
-      
-      // Draw text with musical theme
-      ctx.font = 'bold 20px "Arial", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      
-      for (let i = 0; i < captchaText.length; i++) {
-        const x = 25 + i * 20;
-        const y = 20 + Math.random() * 6;
-        const rotation = Math.random() * 0.3 - 0.15;
-        
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(rotation);
-        
-        // Text shadow for depth
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-        ctx.shadowBlur = 2;
-        ctx.shadowOffsetX = 1;
-        ctx.shadowOffsetY = 1;
-        
-        // Gradient text
-        const textGradient = ctx.createLinearGradient(-10, -10, 10, 10);
-        textGradient.addColorStop(0, '#FFFFFF');
-        textGradient.addColorStop(1, '#E5E7EB');
-        ctx.fillStyle = textGradient;
-        ctx.fillText(captchaText[i], 0, 0);
-        ctx.restore();
-      }
+  const checkGoogleAuth = () => {
+    const p = new URLSearchParams(window.location.search);
+    const token = p.get('token'), userData = p.get('user'), err = p.get('error');
+    if (token && userData) {
+      try {
+        const user = JSON.parse(decodeURIComponent(userData));
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('userData', JSON.stringify(user));
+        window.history.replaceState({}, '', window.location.pathname);
+        window.location.href = user.role === 'admin' ? '/dashboard/admin' : '/dashboard/home';
+      } catch { setErrors({ general: 'Failed to process authentication data' }); }
     }
+    if (err) { setErrors({ general: `Google authentication failed: ${err}` }); window.history.replaceState({}, '', window.location.pathname); }
+  };
+
+  const checkUrlToken = () => {
+    const p = new URLSearchParams(window.location.search);
+    const token = p.get('token'), userData = p.get('user');
+    if (token && userData) {
+      try {
+        const user = JSON.parse(decodeURIComponent(userData));
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('userData', JSON.stringify(user));
+        window.history.replaceState({}, '', window.location.pathname);
+        window.location.href = user.role === 'admin' ? '/dashboard/admin' : '/dashboard/home';
+      } catch {}
+    }
+  };
+
+  /* ── captcha ── */
+  const generateCaptcha = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    setCaptchaText(Array.from({ length: 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join(''));
+    setErrors(p => ({ ...p, captcha: '' }));
+  };
+
+  useEffect(() => {
+    if (!canvasRef.current || !captchaText) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // bg
+    const g = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    g.addColorStop(0, '#FEF3C7'); g.addColorStop(1, '#FFF8EE');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // noise lines
+    for (let i = 0; i < 4; i++) {
+      ctx.strokeStyle = `rgba(217,119,6,0.15)`; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(Math.random() * canvas.width, 0);
+      ctx.lineTo(Math.random() * canvas.width, canvas.height); ctx.stroke();
+    }
+    // letters
+    captchaText.split('').forEach((ch, i) => {
+      ctx.save();
+      ctx.translate(14 + i * 22, 22 + (Math.random() * 6 - 3));
+      ctx.rotate(Math.random() * 0.4 - 0.2);
+      ctx.font = `bold ${18 + Math.random() * 4}px ${SANS}`;
+      ctx.fillStyle = i % 2 === 0 ? '#1E293B' : '#D97706';
+      ctx.fillText(ch, 0, 0);
+      ctx.restore();
+    });
   }, [captchaText]);
 
-  // Clear errors when user types
-  useEffect(() => {
-    setErrors({});
-    setSuccessMessage('');
-  }, [formData, userCaptcha]);
+  useEffect(() => { setErrors({}); setSuccessMessage(''); }, [formData, userCaptcha]);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+  const handleChange = e => setFormData(p => ({ ...p, [e.target.name]: e.target.value }));
+
+  const validate = () => {
+    const e = {};
+    if (!formData.email) e.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) e.email = 'Enter a valid email';
+    if (!formData.password) e.password = 'Password is required';
+    if (!userCaptcha) e.captcha = 'CAPTCHA is required';
+    else if (userCaptcha.toUpperCase() !== captchaText) e.captcha = 'CAPTCHA does not match';
+    return e;
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-
-    // Password validation
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    }
-
-    // CAPTCHA validation
-    if (!userCaptcha) {
-      newErrors.captcha = 'CAPTCHA is required';
-    } else if (userCaptcha !== captchaText) {
-      newErrors.captcha = 'CAPTCHA verification failed';
-    }
-
-    return newErrors;
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    setIsLoading(true);
-    setErrors({});
-    setSuccessMessage('');
-
-    // Validate form
-    const formErrors = validateForm();
-    if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors);
-      setIsLoading(false);
-      return;
-    }
-
+    setIsLoading(true); setErrors({}); setSuccessMessage('');
+    const errs = validate();
+    if (Object.keys(errs).length) { setErrors(errs); setIsLoading(false); return; }
     try {
-      const response = await axios.post('/api/login/user', {
-        email: formData.email.toLowerCase().trim(),
-        password: formData.password
-      });
-      
-      if (response.data.success) {
+      const res = await axios.post('/api/login/user', { email: formData.email.toLowerCase().trim(), password: formData.password });
+      if (res.data.success) {
         setSuccessMessage('Login successful! Redirecting...');
-        
-        // ✅ FIX: Ensure token is stored
-        if (response.data.token) {
-          localStorage.setItem('authToken', response.data.token);
-          console.log('Token stored in localStorage:', response.data.token);
-        }
-
-        // ✅ FIX: Store user data as well
-        if (response.data.user) {
-          localStorage.setItem('userData', JSON.stringify(response.data.user));
-        }
-
-        // Determine redirect path based on user role
-        let redirectPath = '/dashboard/home'; // Default for regular users
-        
-        if (response.data.user?.role === 'admin') {
-          redirectPath = '/dashboard/admin';
-        }
-
-        // Redirect after a short delay
-        setTimeout(() => {
-          window.location.href = redirectPath;
-        }, 1500);
+        if (res.data.token) localStorage.setItem('authToken', res.data.token);
+        if (res.data.user)  localStorage.setItem('userData', JSON.stringify(res.data.user));
+        setTimeout(() => { window.location.href = res.data.user?.role === 'admin' ? '/dashboard/admin' : '/dashboard/home'; }, 1200);
       }
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
-      
-      if (error.response?.status === 400) {
-        if (errorMessage === "Invalid login") {
-          setErrors({ 
-            general: 'No account found with this email. Please sign up first.',
-            email: ' ' // Space to maintain layout
-          });
-        } else if (errorMessage === "Wrong password") {
-          setErrors({ 
-            general: 'Invalid email or password. Please check your credentials.',
-            password: ' ' // Space to maintain layout
-          });
-        } else if (errorMessage === "Use Google Sign-In for this account") {
-          setErrors({ 
-            general: 'This email is registered with Google. Please use Google Sign-In.',
-            email: ' '
-          });
-        } else {
-          setErrors({ general: errorMessage });
-        }
-      } else if (error.response?.status === 403) {
-        // Account not verified or suspended
-        setErrors({ general: errorMessage });
-      } else if (error.response?.status >= 500) {
-        // Server error
-        setErrors({ general: 'Server error. Please try again later.' });
-      } else {
-        // General error
-        setErrors({ general: errorMessage });
-      }
-      
-      // Regenerate CAPTCHA on error
-      generateCaptcha();
-      setUserCaptcha('');
-    } finally {
-      setIsLoading(false);
-    }
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Login failed. Please try again.';
+      if (msg === 'Invalid login') setErrors({ general: 'No account found with this email.' });
+      else if (msg === 'Wrong password') setErrors({ general: 'Incorrect password. Please try again.' });
+      else if (msg === 'Use Google Sign-In for this account') setErrors({ general: 'This email uses Google Sign-In.' });
+      else setErrors({ general: msg });
+      generateCaptcha(); setUserCaptcha('');
+    } finally { setIsLoading(false); }
   };
 
-  const handleGoogleSignIn = () => {
-    // ✅ FIX: Add a redirect parameter to come back to login page for token capture
-    const redirectUrl = `${window.location.origin}/login`;
-    window.location.href = `/api/auth/google?redirect=${encodeURIComponent(redirectUrl)}`;
+  const handleGoogle = () => {
+    window.location.href = `/api/auth/google?redirect=${encodeURIComponent(window.location.origin + '/login')}`;
   };
 
-  // Error message component
-  const ErrorMessage = ({ message }) => (
-    <div className="flex items-center gap-2 mt-1 text-red-300 text-xs animate-fadeIn">
-      <span>⚠️</span>
-      <span>{message}</span>
-    </div>
-  );
-
-  // Success message component
-  const SuccessMessage = ({ message }) => (
-    <div className="flex items-center gap-2 p-3 mb-4 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 text-sm animate-fadeIn">
-      <span>✅</span>
-      <span>{message}</span>
-    </div>
-  );
-
-  // Show loading spinner while checking authentication
-  if (isCheckingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-300 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-lg">Checking authentication...</p>
-        </div>
+  if (isCheckingAuth) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg,#FFF8EE,#FEF3C7)' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ width: 48, height: 48, border: '3px solid #D97706', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem' }} />
+        <p style={{ color: '#64748B', fontFamily: SANS }}>Checking authentication...</p>
       </div>
-    );
-  }
+    </div>
+  );
+
+  const inputStyle = (field) => ({
+    width: '100%', padding: '12px 16px',
+    border: `1.5px solid ${errors[field] ? '#EF4444' : focused === field ? '#D97706' : '#E2E8F0'}`,
+    borderRadius: 12, fontSize: '0.92rem', fontFamily: SANS,
+    color: '#1E293B', background: '#fff', outline: 'none',
+    transition: 'border-color 0.25s, box-shadow 0.25s',
+    boxShadow: focused === field ? '0 0 0 3px rgba(217,119,6,0.12)' : 'none',
+  });
+
+  const labelStyle = { display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: SANS };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Floating musical notes */}
-        <div className="absolute top-1/4 left-1/4 animate-float text-yellow-300 text-2xl">♪</div>
-        <div className="absolute top-1/3 right-1/4 animate-float-delayed text-pink-300 text-3xl">♫</div>
-        <div className="absolute bottom-1/4 left-1/3 animate-float-slow text-green-300 text-2xl">♬</div>
-        <div className="absolute top-1/2 right-1/3 animate-float-delayed-slow text-blue-300 text-3xl">♪</div>
-        
-        {/* Instrument silhouettes */}
-        <div className="absolute -bottom-20 -left-20 opacity-10">
-          <div className="text-8xl">🎸</div>
-        </div>
-        <div className="absolute -top-20 -right-20 opacity-10">
-          <div className="text-8xl">🎹</div>
-        </div>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#FFF8EE 0%,#FEF3C7 45%,#FFFBF5 100%)', fontFamily: SANS, position: 'relative', overflow: 'hidden' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Lato:wght@400;600;700&display=swap');
+        @keyframes floatNote { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-16px) rotate(8deg)} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        @keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+      `}</style>
+
+      {/* Decorative blobs */}
+      <div style={{ position:'absolute', top:'-80px', right:'-80px', width:360, height:360, borderRadius:'50%', background:'radial-gradient(circle,rgba(217,119,6,0.12) 0%,transparent 70%)', pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:'-60px', left:'-60px', width:280, height:280, borderRadius:'50%', background:'radial-gradient(circle,rgba(217,119,6,0.09) 0%,transparent 70%)', pointerEvents:'none' }} />
+      {/* Dot pattern */}
+      <div style={{ position:'absolute', inset:0, opacity:0.35, pointerEvents:'none', backgroundImage:'radial-gradient(circle,rgba(217,119,6,0.18) 1px,transparent 1px)', backgroundSize:'32px 32px' }} />
+      {/* Floating notes */}
+      {[{n:'♩',t:'12%',l:'5%',d:'0s'},{n:'♫',t:'20%',r:'6%',d:'1.4s'},{n:'♬',b:'22%',l:'8%',d:'2.6s'},{n:'𝄞',t:'55%',r:'4%',d:'0.8s'}].map((x,i)=>(
+        <span key={i} style={{ position:'absolute', fontSize:'1.8rem', color:'#D97706', opacity:0.13, top:x.t, bottom:x.b, left:x.l, right:x.r, animation:`floatNote 7s ease-in-out ${x.d} infinite`, pointerEvents:'none', userSelect:'none' }}>{x.n}</span>
+      ))}
+
+      {/* Nav strip */}
+      <div style={{ position:'fixed', top:0, left:0, right:0, zIndex:100, background:'#fff', borderBottom:'2px solid #D97706', boxShadow:'0 2px 12px rgba(217,119,6,0.1)', height:64, display:'flex', alignItems:'center', padding:'0 2rem', justifyContent:'space-between' }}>
+        <Link to="/" style={{ display:'flex', alignItems:'center', gap:10, textDecoration:'none' }}>
+          <img src="/Raadhyam.png" alt="Raadhyam" style={{ height:40 }} onError={e=>e.target.style.display='none'} />
+          <span style={{ fontFamily:SERIF, fontSize:'1.3rem', fontWeight:700, color:'#1E293B' }}>Raadhyam<span style={{color:'#D97706'}}>.</span></span>
+        </Link>
+        <Link to="/" style={{ fontSize:'0.82rem', fontWeight:700, color:'#64748B', textDecoration:'none', letterSpacing:'0.06em', textTransform:'uppercase' }}>← Back to Home</Link>
       </div>
 
-      <NavBarPage />
+      {/* Card */}
+      <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'90px 1rem 2rem' }}>
+        <div style={{ background:'#fff', borderRadius:24, boxShadow:'0 24px 80px rgba(217,119,6,0.14), 0 4px 24px rgba(30,41,59,0.08)', padding:'2.5rem', width:'100%', maxWidth:460, animation:'fadeUp 0.5s ease both', border:'1px solid rgba(217,119,6,0.15)' }}>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex items-center justify-center w-full px-4 py-8 mt-16">
-        {/* Main Login Card */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 w-full max-w-xl border border-white/20 relative z-10">
-          {/* Header with Musical Theme */}
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 rounded-full">
-                <img src="/Logo.png" alt="Raadhyam Logo" className="h-12 w-auto" />
-              </div>
-            </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-300 via-pink-300 to-blue-300 bg-clip-text text-transparent mb-2">
-              Raadhyam Login
-            </h1>
-            <p className="text-gray-300">Find your Rhythm, join the Raadhyam</p>
+          {/* Header */}
+          <div style={{ textAlign:'center', marginBottom:'2rem' }}>
+            <div style={{ width:72, height:72, borderRadius:'50%', background:'linear-gradient(135deg,#D97706,#B45309)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 1rem', boxShadow:'0 8px 24px rgba(217,119,6,0.35)', fontSize:'2rem' }}>🎵</div>
+            <h1 style={{ fontFamily:SERIF, fontSize:'2rem', fontWeight:700, color:'#1E293B', marginBottom:6 }}>Welcome Back</h1>
+            <p style={{ color:'#64748B', fontSize:'0.9rem' }}>Sign in to continue your musical journey</p>
           </div>
 
-          {/* Success Message */}
-          {successMessage && <SuccessMessage message={successMessage} />}
-
-          {/* General Error Message */}
+          {/* Success */}
+          {successMessage && (
+            <div style={{ background:'rgba(5,150,105,0.08)', border:'1px solid rgba(5,150,105,0.25)', borderRadius:12, padding:'12px 16px', marginBottom:'1.25rem', display:'flex', alignItems:'center', gap:10, color:'#065F46', fontSize:'0.88rem', fontWeight:600 }}>
+              ✅ {successMessage}
+            </div>
+          )}
+          {/* Error */}
           {errors.general && (
-            <div className="flex items-center gap-2 p-3 mb-4 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 text-sm animate-fadeIn">
-              <span>❌</span>
-              <span>{errors.general}</span>
+            <div style={{ background:'rgba(239,68,68,0.07)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:12, padding:'12px 16px', marginBottom:'1.25rem', display:'flex', alignItems:'center', gap:10, color:'#991B1B', fontSize:'0.88rem', fontWeight:600 }}>
+              ⚠️ {errors.general}
             </div>
           )}
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
-            <div className="group">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2 group-hover:text-white transition-colors">
-                <span className="flex items-center gap-2">
-                  <span className="text-purple-300">✉️</span>
-                  Email Address
-                </span>
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className={`w-full px-4 py-3 bg-white/5 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-300 text-white placeholder-gray-400 backdrop-blur-sm hover:bg-white/10 ${
-                  errors.email || errors.general ? 'border-red-400' : 'border-white/20'
-                }`}
-                placeholder="Enter your email"
-              />
-              {errors.email && <ErrorMessage message={errors.email} />}
+          <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'1.1rem' }}>
+            {/* Email */}
+            <div>
+              <label style={labelStyle}>✉ Email Address</label>
+              <input type="email" name="email" value={formData.email} onChange={handleChange}
+                placeholder="your@email.com" style={inputStyle('email')}
+                onFocus={()=>setFocused('email')} onBlur={()=>setFocused('')} />
+              {errors.email && <p style={{ color:'#EF4444', fontSize:'0.75rem', marginTop:4 }}>⚠ {errors.email}</p>}
             </div>
 
-            {/* Password Field */}
-            <div className="group">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-2 group-hover:text-white transition-colors">
-                <span className="flex items-center gap-2">
-                  <span className="text-purple-300">🔒</span>
-                  Password
-                </span>
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className={`w-full px-4 py-3 bg-white/5 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-300 text-white placeholder-gray-400 backdrop-blur-sm hover:bg-white/10 ${
-                  errors.password || errors.general ? 'border-red-400' : 'border-white/20'
-                }`}
-                placeholder="Enter your password"
-              />
-              {errors.password && <ErrorMessage message={errors.password} />}
-            </div>
-
-            {/* CAPTCHA Section */}
-            <div className="space-y-3 group">
-              <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-gray-200 group-hover:text-white transition-colors">
-                  <span className="flex items-center gap-2">
-                    <span className="text-purple-300">🎼</span>
-                    CAPTCHA Verification
-                  </span>
-                </label>
-                <button
-                  type="button"
-                  onClick={generateCaptcha}
-                  className="text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg transition duration-200 font-medium flex items-center gap-1"
-                >
-                  <span>🔄</span>
-                  Refresh
+            {/* Password */}
+            <div>
+              <label style={labelStyle}>🔒 Password</label>
+              <div style={{ position:'relative' }}>
+                <input type={showPass ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange}
+                  placeholder="Enter your password" style={{ ...inputStyle('password'), paddingRight:44 }}
+                  onFocus={()=>setFocused('password')} onBlur={()=>setFocused('')} />
+                <button type="button" onClick={()=>setShowPass(p=>!p)} style={{ position:'absolute', right:14, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:'1rem', color:'#94A3B8' }}>
+                  {showPass ? '🙈' : '👁'}
                 </button>
               </div>
-              
-              <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
-                <canvas
-                  ref={canvasRef}
-                  width="150"
-                  height="40"
-                  className={`border rounded-xl backdrop-blur-sm flex-shrink-0 ${
-                    errors.captcha ? 'border-red-400' : 'border-white/20'
-                  }`}
-                />
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    value={userCaptcha}
-                    onChange={(e) => setUserCaptcha(e.target.value)}
-                    placeholder="Enter CAPTCHA"
-                    className={`w-full px-4 py-2 bg-white/5 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-300 text-white placeholder-gray-400 backdrop-blur-sm hover:bg-white/10 ${
-                      errors.captcha ? 'border-red-400' : 'border-white/20'
-                  }`}
-                    required
-                  />
-                  {errors.captcha && <ErrorMessage message={errors.captcha} />}
-                </div>
+              {errors.password && <p style={{ color:'#EF4444', fontSize:'0.75rem', marginTop:4 }}>⚠ {errors.password}</p>}
+            </div>
+
+            {/* CAPTCHA */}
+            <div>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                <label style={labelStyle}>🎼 CAPTCHA</label>
+                <button type="button" onClick={generateCaptcha} style={{ fontSize:'0.75rem', fontWeight:700, color:'#D97706', background:'rgba(217,119,6,0.1)', border:'1px solid rgba(217,119,6,0.25)', borderRadius:8, padding:'3px 10px', cursor:'pointer', fontFamily:SANS }}>↻ Refresh</button>
               </div>
+              <div style={{ display:'flex', gap:10, alignItems:'center' }}>
+                <canvas ref={canvasRef} width={130} height={44} style={{ borderRadius:10, border:'1.5px solid #E2E8F0', flexShrink:0 }} />
+                <input type="text" value={userCaptcha} onChange={e=>setUserCaptcha(e.target.value)}
+                  placeholder="Type here" style={{ ...inputStyle('captcha'), flex:1 }}
+                  onFocus={()=>setFocused('captcha')} onBlur={()=>setFocused('')} />
+              </div>
+              {errors.captcha && <p style={{ color:'#EF4444', fontSize:'0.75rem', marginTop:4 }}>⚠ {errors.captcha}</p>}
             </div>
 
-            {/* Forgot Password Link */}
-            <div className="text-right">
-              <a 
-                href="/forgot-password" 
-                className="text-purple-300 hover:text-purple-200 text-sm font-medium transition-colors duration-200 hover:underline"
-              >
-                Forgot your password?
-              </a>
+            {/* Forgot */}
+            <div style={{ textAlign:'right', marginTop:-4 }}>
+              <a href="/forgot-password" style={{ fontSize:'0.8rem', color:'#D97706', fontWeight:700, textDecoration:'none' }}>Forgot password?</a>
             </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-4 rounded-xl hover:from-purple-700 hover:to-pink-700 disabled:from-purple-400 disabled:to-pink-400 disabled:cursor-not-allowed transition duration-300 font-medium transform hover:scale-105 disabled:scale-100 shadow-lg hover:shadow-xl group"
+            {/* Submit */}
+            <button type="submit" disabled={isLoading} style={{
+              background: isLoading ? '#E2E8F0' : 'linear-gradient(135deg,#D97706,#B45309)',
+              color: isLoading ? '#94A3B8' : '#fff', border:'none', borderRadius:12,
+              padding:'14px', fontSize:'1rem', fontWeight:700, cursor: isLoading ? 'not-allowed' : 'pointer',
+              fontFamily:SANS, letterSpacing:'0.04em',
+              boxShadow: isLoading ? 'none' : '0 6px 20px rgba(217,119,6,0.35)',
+              transition:'transform 0.2s, box-shadow 0.2s',
+              display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+            }}
+              onMouseEnter={e=>{ if(!isLoading){ e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 10px 28px rgba(217,119,6,0.5)'; }}}
+              onMouseLeave={e=>{ e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 6px 20px rgba(217,119,6,0.35)'; }}
             >
-              <span className="flex items-center justify-center gap-2">
-                {isLoading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Signing In...
-                  </>
-                ) : (
-                  <>
-                    <span className="group-hover:animate-bounce">🎵</span>
-                    Sign In to the Music
-                    <span className="group-hover:animate-bounce">🎶</span>
-                  </>
-                )}
-              </span>
+              {isLoading ? (<><div style={{ width:18, height:18, border:'2px solid #94A3B8', borderTopColor:'transparent', borderRadius:'50%', animation:'spin 0.8s linear infinite' }} /> Signing In...</>) : (<>🎵 Sign In to Raadhyam</>)}
             </button>
           </form>
 
           {/* Divider */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/20"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-transparent text-gray-300">Or continue with</span>
-              </div>
-            </div>
-
-            {/* Google Sign-In Button */}
-            <div className="mt-4">
-              <button
-                onClick={handleGoogleSignIn}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 bg-white/10 backdrop-blur-sm border border-white/20 text-white py-3 px-4 rounded-xl hover:bg-white/20 disabled:bg-white/5 disabled:cursor-not-allowed transition duration-300 font-medium transform hover:scale-105 disabled:scale-100"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Sign in with Google
-              </button>
-            </div>
+          <div style={{ display:'flex', alignItems:'center', gap:12, margin:'1.5rem 0' }}>
+            <div style={{ flex:1, height:1, background:'#E2E8F0' }} />
+            <span style={{ color:'#94A3B8', fontSize:'0.78rem', fontWeight:600, letterSpacing:'0.06em' }}>OR</span>
+            <div style={{ flex:1, height:1, background:'#E2E8F0' }} />
           </div>
 
-          {/* Footer Links */}
-          <div className="mt-6 text-center text-sm text-gray-300">
+          {/* Google */}
+          <button onClick={handleGoogle} disabled={isLoading} style={{
+            width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:12,
+            background:'#fff', border:'1.5px solid #E2E8F0', borderRadius:12,
+            padding:'12px', fontSize:'0.92rem', fontWeight:700, cursor:'pointer',
+            color:'#1E293B', fontFamily:SANS,
+            transition:'border-color 0.25s, box-shadow 0.25s',
+            boxShadow:'0 2px 8px rgba(30,41,59,0.06)',
+          }}
+            onMouseEnter={e=>{ e.currentTarget.style.borderColor='#D97706'; e.currentTarget.style.boxShadow='0 4px 16px rgba(217,119,6,0.15)'; }}
+            onMouseLeave={e=>{ e.currentTarget.style.borderColor='#E2E8F0'; e.currentTarget.style.boxShadow='0 2px 8px rgba(30,41,59,0.06)'; }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Continue with Google
+          </button>
+
+          {/* Register link */}
+          <p style={{ textAlign:'center', marginTop:'1.5rem', color:'#64748B', fontSize:'0.88rem' }}>
             Don't have an account?{' '}
-            <a href="/register" className="text-purple-300 hover:text-purple-200 font-medium transition-colors duration-200 hover:underline">
-              Join the Orchestra
-            </a>
-          </div>
+            <Link to="/register" style={{ color:'#D97706', fontWeight:700, textDecoration:'none' }}>Create Account</Link>
+          </p>
         </div>
       </div>
-
-      {/* Footer */}
-      <div className="relative z-10">
-        <FooterPage />
-      </div>
-
-      {/* Add custom animations */}
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(180deg); }
-        }
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-15px) rotate(-180deg); }
-        }
-        @keyframes float-slow {
-          0%, 100% { transform: translateY(0px) scale(1); }
-          50% { transform: translateY(-10px) scale(1.1); }
-        }
-        @keyframes float-delayed-slow {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-25px) rotate(90deg); }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-        .animate-float-delayed {
-          animation: float-delayed 8s ease-in-out infinite;
-        }
-        .animate-float-slow {
-          animation: float-slow 10s ease-in-out infinite;
-        }
-        .animate-float-delayed-slow {
-          animation: float-delayed-slow 12s ease-in-out infinite;
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-      `}</style>
     </div>
   );
 };

@@ -210,41 +210,66 @@ ${formData.message}
                 pointerEvents: 'none', zIndex: 0,
             }} />
 
-            <main style={{ position: 'relative', zIndex: 1, maxWidth: 1280, margin: '0 auto', padding: '120px 2rem 60px' }}>
+            {/* ── HERO SECTION ── */}
+            <section style={{
+                paddingTop: 70, minHeight: '42vh',
+                background: 'linear-gradient(135deg,#FFF8EE 0%,#FEF3C7 50%,#FFFBF5 100%)',
+                position: 'relative', overflow: 'hidden',
+                display: 'flex', alignItems: 'center',
+            }}>
+                {/* Decorative blobs */}
+                <div style={{ position:'absolute', top:'-60px', right:'-60px', width:340, height:340, borderRadius:'50%', background:'radial-gradient(circle,rgba(217,119,6,0.12) 0%,transparent 70%)', pointerEvents:'none' }} />
+                <div style={{ position:'absolute', bottom:'-40px', left:'-40px', width:260, height:260, borderRadius:'50%', background:'radial-gradient(circle,rgba(217,119,6,0.08) 0%,transparent 70%)', pointerEvents:'none' }} />
+                {/* Dot pattern */}
+                <div style={{ position:'absolute', inset:0, opacity:0.35, pointerEvents:'none', backgroundImage:'radial-gradient(circle,rgba(217,119,6,0.18) 1px,transparent 1px)', backgroundSize:'32px 32px' }} />
+                {/* Musical staff lines */}
+                {[0,1,2,3,4].map(i => (
+                    <div key={i} style={{ position:'absolute', left:0, right:0, top:`${20+i*14}%`, height:1, background:'rgba(217,119,6,0.06)', pointerEvents:'none' }} />
+                ))}
 
-                {/* Header */}
-                <div style={{ textAlign: 'center', marginBottom: '4rem', animation: 'fadeUp 0.8s ease both' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-                        <div style={{
-                            background: 'linear-gradient(135deg,#D97706,#B45309)',
-                            padding: '14px', borderRadius: '50%',
-                            boxShadow: '0 8px 28px rgba(217,119,6,0.35)',
-                        }}>
-                            <img src="/Logo.png" alt="Raadhyam Logo" style={{ height: 52, display: 'block' }} />
-                        </div>
-                    </div>
-                    <div className="section-tag" style={{ margin: '0 auto 1rem' }}>🎵 Reach Out</div>
+                <div style={{ maxWidth:1280, margin:'0 auto', padding:'5rem 2rem 4rem', width:'100%', position:'relative', zIndex:2, textAlign:'center', animation:'fadeUp 0.8s ease both' }}>
+                    <div className="section-tag" style={{ margin:'0 auto 1rem' }}>🎵 Reach Out</div>
                     <h1 style={{
-                        fontFamily: "'Cormorant Garamond', Georgia, serif",
-                        fontSize: 'clamp(2.4rem,5vw,3.8rem)', fontWeight: 700,
-                        color: '#1E293B', lineHeight: 1.1, letterSpacing: '-0.02em',
+                        fontFamily:"'Cormorant Garamond', Georgia, serif",
+                        fontSize:'clamp(2.6rem,5vw,4rem)', fontWeight:700,
+                        color:'#1E293B', lineHeight:1.1, letterSpacing:'-0.02em', marginBottom:'1rem',
                     }}>
-                        Get In{' '}
+                        Let's Create{' '}
                         <span style={{
-                            background: 'linear-gradient(90deg,#D97706,#F59E0B,#D97706)',
-                            backgroundSize: '200% auto',
-                            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                            animation: 'shimmer 3s linear infinite',
-                        }}>Touch</span>
+                            background:'linear-gradient(90deg,#D97706,#F59E0B,#D97706)',
+                            backgroundSize:'200% auto',
+                            WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent',
+                            animation:'shimmer 3s linear infinite',
+                        }}>Music Together</span>
                     </h1>
-                    <div className="divider-amber" style={{ margin: '14px auto 0' }} />
-                    <p style={{
-                        color: '#475569', fontSize: '1.05rem', lineHeight: 1.8,
-                        maxWidth: 520, margin: '1.5rem auto 0',
-                    }}>
-                        Let's create beautiful music together. Reach out for any inquiries, collaborations, or just to say hello!
+                    <div className="divider-amber" style={{ margin:'0 auto 1.5rem' }} />
+                    <p style={{ color:'#475569', fontSize:'1.1rem', lineHeight:1.8, maxWidth:540, margin:'0 auto 2rem' }}>
+                        Have a question, want to enroll, or just want to say hello? We'd love to hear from you. Reach out and we'll respond within 24 hours.
                     </p>
+                    {/* Quick contact pills */}
+                    <div style={{ display:'flex', gap:12, justifyContent:'center', flexWrap:'wrap' }}>
+                        {[
+                            { icon:'📧', label:'raadhyammusicals@gmail.com', href:'mailto:raadhyammusicals@gmail.com' },
+                            { icon:'💬', label:'WhatsApp Us', href:'https://wa.me/918410337618' },
+                        ].map((c,i) => (
+                            <a key={i} href={c.href} target="_blank" rel="noreferrer" style={{
+                                display:'flex', alignItems:'center', gap:8,
+                                background:'#fff', border:'1.5px solid rgba(217,119,6,0.3)',
+                                borderRadius:24, padding:'8px 20px',
+                                color:'#1E293B', fontSize:'0.85rem', fontWeight:700,
+                                textDecoration:'none', fontFamily:"'Lato',sans-serif",
+                                boxShadow:'0 2px 12px rgba(217,119,6,0.1)',
+                                transition:'transform 0.2s, box-shadow 0.2s',
+                            }}
+                                onMouseEnter={e=>{ e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 6px 20px rgba(217,119,6,0.2)'; }}
+                                onMouseLeave={e=>{ e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 2px 12px rgba(217,119,6,0.1)'; }}
+                            >{c.icon} {c.label}</a>
+                        ))}
+                    </div>
                 </div>
+            </section>
+
+            <main style={{ position: 'relative', zIndex: 1, maxWidth: 1280, margin: '0 auto', padding: '4rem 2rem 60px' }}>
 
                 {/* Two column grid */}
                 <div style={{
