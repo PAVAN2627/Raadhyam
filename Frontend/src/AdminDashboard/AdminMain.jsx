@@ -129,7 +129,8 @@ const MainDashboardAdmin = () => {
       return response.data;
     } catch (error) {
       console.error('Error creating course:', error);
-      throw new Error('Error creating course. Please try again.');
+      const msg = error?.response?.data?.message || error?.response?.data?.error || error.message || 'Error creating course';
+      throw new Error(msg);
     }
   };
 
@@ -141,7 +142,8 @@ const MainDashboardAdmin = () => {
       return response.data;
     } catch (error) {
       console.error('Error updating course:', error);
-      throw new Error('Error updating course. Please try again.');
+      const msg = error?.response?.data?.message || error?.response?.data?.error || error.message || 'Error updating course';
+      throw new Error(msg);
     }
   };
 
@@ -233,6 +235,22 @@ const MainDashboardAdmin = () => {
   const editMusicNote = (note) => {
     setEditingNote(note);
     setShowNoteForm(true);
+  };
+
+  const handleTabChange = (tab) => {
+    // Close all modals when switching tabs
+    setShowCourseForm(false);
+    setShowNoteForm(false);
+    setShowModuleForm(false);
+    setShowLessonForm(false);
+    setEditingCourse(null);
+    setEditingNote(null);
+    // Reset course detail view when switching away from courses
+    if (tab !== 'courses') {
+      setCurrentCourseView('list');
+      setSelectedCourse(null);
+    }
+    setActiveTab(tab);
   };
 
   // Course Navigation Handlers
@@ -438,7 +456,7 @@ const MainDashboardAdmin = () => {
   };
 
   return (
-    <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+    <DashboardLayout activeTab={activeTab} setActiveTab={handleTabChange}>
       {renderContent()}
       
       {/* Course Modals */}

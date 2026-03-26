@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
   Edit3, 
@@ -11,7 +11,8 @@ import {
   FileText,
   Music,
   Type,
-  Eye
+  Eye,
+  Sparkles
 } from 'lucide-react';
 import LessonList from './LessonList';
 
@@ -27,7 +28,12 @@ const ModuleList = ({
 }) => {
   const [expandedModules, setExpandedModules] = useState({});
   const [draggingModule, setDraggingModule] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
 //   const [draggingLesson, setDraggingLesson] = useState(null);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   const toggleModule = (moduleIndex) => {
     setExpandedModules(prev => ({
@@ -88,21 +94,25 @@ const ModuleList = ({
 
   if (modules.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center animate-fadeIn">
         <div className="max-w-md mx-auto">
-          <div className="bg-blue-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-            <List size={24} className="text-blue-600" />
+          <div className="relative inline-block mb-6">
+            <div className="absolute inset-0 bg-red-500/20 rounded-full blur-2xl animate-pulse"></div>
+            <div className="relative bg-gradient-to-br from-red-100 to-red-200 p-6 rounded-full w-20 h-20 flex items-center justify-center mx-auto shadow-lg">
+              <List size={32} className="text-red-600" />
+            </div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No modules yet</h3>
-          <p className="text-gray-600 mb-6">
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">No modules yet</h3>
+          <p className="text-gray-600 mb-8 text-lg">
             Start building your course by creating your first module. Modules help organize your content into logical sections.
           </p>
           <button
             onClick={onAddModule}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center mx-auto"
+            className="relative bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-4 rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 flex items-center mx-auto font-bold shadow-lg shadow-red-600/50 hover:shadow-xl hover:shadow-red-600/60 hover:scale-105 overflow-hidden group"
           >
-            <Plus size={20} className="mr-2" />
-            Create First Module
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            <Plus size={24} className="mr-2 relative z-10" />
+            <span className="relative z-10">Create First Module</span>
           </button>
         </div>
       </div>
@@ -110,27 +120,34 @@ const ModuleList = ({
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div className="space-y-6">
+      {/* Enhanced Header */}
+      <div className={`bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-2xl transition-all duration-500 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-8'
+      }`}>
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Course Content</h2>
-            <p className="text-gray-600">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent flex items-center">
+              <List className="mr-3 text-red-600" size={28} />
+              Course Content
+            </h2>
+            <p className="text-gray-600 mt-1 flex items-center">
+              <Sparkles size={16} className="mr-2 text-red-500" />
               {modules.length} modules • {modules.reduce((total, module) => total + (module.lessons?.length || 0), 0)} lessons
             </p>
           </div>
           <button
             onClick={onAddModule}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+            className="relative bg-gradient-to-r from-red-600 to-red-700 text-white px-5 py-2.5 rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 flex items-center font-bold shadow-lg shadow-red-600/50 hover:shadow-xl hover:shadow-red-600/60 hover:scale-105 overflow-hidden group"
           >
-            <Plus size={20} className="mr-2" />
-            Add Module
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            <Plus size={20} className="mr-2 relative z-10" />
+            <span className="relative z-10">Add Module</span>
           </button>
         </div>
       </div>
 
-      {/* Modules List */}
+      {/* Enhanced Modules List */}
       <div className="space-y-4">
         {modules.map((module, moduleIndex) => {
           const stats = calculateModuleStats(module);
@@ -139,54 +156,51 @@ const ModuleList = ({
           return (
             <div
               key={moduleIndex}
-              className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all ${
-                draggingModule === moduleIndex ? 'opacity-50' : ''
-              }`}
+              className={`bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-500 hover:shadow-2xl ${
+                draggingModule === moduleIndex ? 'opacity-50 scale-95' : 'hover:-translate-y-1'
+              } ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+              style={{ transitionDelay: `${moduleIndex * 100}ms` }}
               draggable
               onDragStart={(e) => handleModuleDragStart(e, moduleIndex)}
               onDragOver={(e) => handleModuleDragOver(e, moduleIndex)}
               onDrop={(e) => handleModuleDrop(e, moduleIndex)}
             >
-              {/* Module Header */}
-              <div className="p-6 border-b border-gray-200">
+              {/* Enhanced Module Header */}
+              <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white hover:from-red-50 hover:to-rose-50 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4 flex-1">
                     <div className="flex items-center space-x-2">
                       <button
-                        className="text-gray-400 hover:text-gray-600 p-1 cursor-move"
+                        className="text-gray-400 hover:text-red-600 p-2 cursor-move hover:bg-red-50 rounded-lg transition-all duration-300 hover:scale-110"
                         title="Drag to reorder"
                       >
-                        <Move size={16} />
+                        <Move size={18} />
                       </button>
                       <button
                         onClick={() => toggleModule(moduleIndex)}
-                        className="text-gray-400 hover:text-gray-600 p-1"
+                        className="text-gray-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg transition-all duration-300 hover:scale-110"
                       >
-                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                       </button>
                     </div>
                     
-                    <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
-                      <List size={20} />
+                    <div className="bg-gradient-to-br from-red-100 to-red-200 text-red-600 p-3 rounded-xl shadow-lg hover:scale-110 transition-transform duration-300">
+                      <List size={22} />
                     </div>
                     
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 text-lg">{module.title}</h3>
+                      <h3 className="font-bold text-gray-900 text-lg hover:text-red-600 transition-colors duration-300">{module.title}</h3>
                       <p className="text-gray-600 text-sm mt-1">
                         {module.description || 'No description'}
                       </p>
                       <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                        <span>{stats.totalLessons} lessons</span>
-                        <span>•</span>
-                        <span>{stats.duration}</span>
+                        <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-bold">{stats.totalLessons} lessons</span>
+                        <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-bold">{stats.duration}</span>
                         {module.lessons?.some(lesson => lesson.isFreePreview) && (
-                          <>
-                            <span>•</span>
-                            <span className="text-green-600 flex items-center">
-                              <Eye size={14} className="mr-1" />
-                              Free preview available
-                            </span>
-                          </>
+                          <span className="text-green-600 flex items-center bg-green-100 px-3 py-1 rounded-full font-bold">
+                            <Eye size={14} className="mr-1" />
+                            Free preview
+                          </span>
                         )}
                       </div>
                     </div>
@@ -195,32 +209,32 @@ const ModuleList = ({
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => onAddLesson(moduleIndex)}
-                      className="text-blue-600 hover:text-blue-800 p-2"
+                      className="text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 p-2.5 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg shadow-blue-500/50"
                       title="Add Lesson"
                     >
-                      <Plus size={16} />
+                      <Plus size={18} />
                     </button>
                     <button
                       onClick={() => onEditModule(module, moduleIndex)}
-                      className="text-gray-600 hover:text-gray-800 p-2"
+                      className="text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 p-2.5 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg shadow-green-500/50"
                       title="Edit Module"
                     >
-                      <Edit3 size={16} />
+                      <Edit3 size={18} />
                     </button>
                     <button
                       onClick={() => onDeleteModule(moduleIndex)}
-                      className="text-red-600 hover:text-red-800 p-2"
+                      className="text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 p-2.5 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg shadow-red-500/50"
                       title="Delete Module"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Lessons List */}
+              {/* Enhanced Lessons List */}
               {isExpanded && (
-                <div className="bg-gray-50 p-6">
+                <div className="bg-gradient-to-br from-gray-50 to-white p-6 animate-fadeIn">
                   <LessonList
                     lessons={module.lessons || []}
                     moduleIndex={moduleIndex}
@@ -238,6 +252,14 @@ const ModuleList = ({
           );
         })}
       </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+      `}</style>
     </div>
   );
 };

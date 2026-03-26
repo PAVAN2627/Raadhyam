@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, PlayCircle, FileText, Type, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
+import { X, PlayCircle, FileText, Type, CheckCircle, Loader2, AlertCircle, Eye, Sparkles, Clock } from 'lucide-react';
 
 const LessonFormModal = ({ lesson, onSave, onClose, uploadFile }) => {
   const [formData, setFormData] = useState({
@@ -322,15 +322,16 @@ const LessonFormModal = ({ lesson, onSave, onClose, uploadFile }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-gray-900">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-slideUp">
+        <div className="sticky top-0 bg-gradient-to-r from-red-50 to-rose-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center z-10">
+          <h3 className="text-xl font-bold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent flex items-center">
+            <PlayCircle className="mr-2 text-red-600" size={24} />
             {lesson ? 'Edit Lesson' : 'Add New Lesson'}
           </h3>
           <button 
             onClick={onClose} 
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all duration-300 hover:scale-110"
             disabled={uploading}
           >
             <X size={24} />
@@ -338,12 +339,13 @@ const LessonFormModal = ({ lesson, onSave, onClose, uploadFile }) => {
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Lesson Type Selection */}
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+          {/* Enhanced Lesson Type Selection */}
+          <div className="bg-gradient-to-r from-red-50 to-rose-50 p-6 rounded-2xl shadow-inner">
+            <label className="block text-sm font-bold text-gray-700 mb-4 flex items-center">
+              <Sparkles size={18} className="mr-2 text-red-500" />
               Lesson Type
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-3">
               {[
                 { value: 'video', label: 'Video', icon: PlayCircle },
                 { value: 'pdf', label: 'PDF', icon: FileText },
@@ -359,30 +361,31 @@ const LessonFormModal = ({ lesson, onSave, onClose, uploadFile }) => {
                     type="button"
                     onClick={() => handleTypeChange(typeOption.value)}
                     disabled={isDisabled}
-                    className={`p-3 rounded-lg border-2 text-center transition-all ${
+                    className={`p-4 rounded-xl border-2 text-center transition-all duration-300 ${
                       isSelected
-                        ? 'border-blue-500 bg-blue-500 text-white'
-                        : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                    } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        ? 'border-red-500 bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-600/50 scale-105'
+                        : 'border-gray-300 bg-white text-gray-700 hover:border-red-300 hover:bg-red-50'
+                    } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'}`}
                   >
-                    <Icon size={20} className="mx-auto mb-1" />
-                    <span className="text-sm font-medium">{typeOption.label}</span>
+                    <Icon size={24} className="mx-auto mb-2" />
+                    <span className="text-sm font-bold">{typeOption.label}</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Basic Information */}
+          {/* Enhanced Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                <FileText size={16} className="mr-2 text-red-500" />
                 Lesson Title *
               </label>
               <input
                 type="text"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-300 hover:border-red-300"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="e.g., Introduction to Scales"
@@ -390,13 +393,14 @@ const LessonFormModal = ({ lesson, onSave, onClose, uploadFile }) => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                <Clock size={16} className="mr-2 text-red-500" />
                 Duration (MM:SS)
               </label>
               <input
                 type="text"
                 placeholder="15:30"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-300 hover:border-red-300"
                 value={formData.duration}
                 onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                 disabled={uploading}
@@ -405,12 +409,13 @@ const LessonFormModal = ({ lesson, onSave, onClose, uploadFile }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+              <Type size={16} className="mr-2 text-red-500" />
               Description
             </label>
             <textarea
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-300 hover:border-red-300"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Describe what this lesson covers..."
@@ -418,19 +423,22 @@ const LessonFormModal = ({ lesson, onSave, onClose, uploadFile }) => {
             />
           </div>
 
-          {/* Free Preview Toggle */}
-          <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+          {/* Enhanced Free Preview Toggle */}
+          <div className="flex items-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-2 border-green-200 hover:border-green-300 transition-all duration-300">
             <input
               type="checkbox"
               id="isFreePreview"
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded cursor-pointer"
               checked={formData.isFreePreview}
               onChange={(e) => setFormData({ ...formData, isFreePreview: e.target.checked })}
               disabled={uploading}
             />
-            <label htmlFor="isFreePreview" className="ml-3 block text-sm text-gray-700">
-              <span className="font-medium">Free Preview Lesson</span>
-              <p className="text-gray-500 text-xs mt-1">
+            <label htmlFor="isFreePreview" className="ml-4 block text-sm text-gray-700 cursor-pointer">
+              <span className="font-bold text-green-700 flex items-center">
+                <Eye size={16} className="mr-2" />
+                Free Preview Lesson
+              </span>
+              <p className="text-gray-600 text-xs mt-1">
                 Students can access this lesson without enrolling in the course
               </p>
             </label>
@@ -441,12 +449,12 @@ const LessonFormModal = ({ lesson, onSave, onClose, uploadFile }) => {
             {renderFileUploadSection()}
           </div>
 
-          {/* Form Actions */}
-          <div className="flex justify-end space-x-4 pt-6 border-t">
+          {/* Enhanced Form Actions */}
+          <div className="flex justify-end space-x-4 pt-6 border-t-2 border-gray-200">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 font-semibold hover:scale-105 disabled:opacity-50"
               disabled={uploading}
             >
               Cancel
@@ -454,17 +462,18 @@ const LessonFormModal = ({ lesson, onSave, onClose, uploadFile }) => {
             <button
               type="submit"
               disabled={!canSubmit()}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="relative px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 font-bold shadow-lg shadow-red-600/50 hover:shadow-xl hover:shadow-red-600/60 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center overflow-hidden group"
             >
               {uploading ? (
                 <>
-                  <Loader2 size={16} className="animate-spin mr-2" />
+                  <Loader2 size={18} className="animate-spin mr-2" />
                   Uploading...
                 </>
               ) : (
                 <>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                   {getTypeIcon(formData.type)}
-                  <span className="ml-2">
+                  <span className="ml-2 relative z-10">
                     {lesson ? 'Update Lesson' : 'Add Lesson'}
                   </span>
                 </>
@@ -472,22 +481,38 @@ const LessonFormModal = ({ lesson, onSave, onClose, uploadFile }) => {
             </button>
           </div>
 
-          {/* Validation Help Text */}
+          {/* Enhanced Validation Help Text */}
           {!canSubmit() && !uploading && (
-            <div className="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
-              {!formData.title.trim() ? (
-                <p>⚠️ Please enter a lesson title</p>
-              ) : formData.type === 'video' && !formData.videoUrl ? (
-                <p>⚠️ Please upload a video file to continue</p>
-              ) : formData.type === 'pdf' && !formData.pdfUrl ? (
-                <p>⚠️ Please upload a PDF file to continue</p>
-              ) : formData.type === 'text' && !formData.content.trim() ? (
-                <p>⚠️ Please add text content to continue</p>
-              ) : null}
+            <div className="text-sm text-red-600 bg-red-50 p-4 rounded-xl border-2 border-red-200 flex items-start">
+              <AlertCircle size={18} className="mr-2 flex-shrink-0 mt-0.5" />
+              <div>
+                {!formData.title.trim() ? (
+                  <p className="font-semibold">⚠️ Please enter a lesson title</p>
+                ) : formData.type === 'video' && !formData.videoUrl ? (
+                  <p className="font-semibold">⚠️ Please upload a video file to continue</p>
+                ) : formData.type === 'pdf' && !formData.pdfUrl ? (
+                  <p className="font-semibold">⚠️ Please upload a PDF file to continue</p>
+                ) : formData.type === 'text' && !formData.content.trim() ? (
+                  <p className="font-semibold">⚠️ Please add text content to continue</p>
+                ) : null}
+              </div>
             </div>
           )}
         </form>
       </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+        .animate-slideUp { animation: slideUp 0.3s ease-out; }
+      `}</style>
     </div>
   );
 };
