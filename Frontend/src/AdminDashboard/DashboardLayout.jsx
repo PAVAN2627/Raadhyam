@@ -1,301 +1,172 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Menu, 
-  X, 
-  LogOut, 
-  User, 
-  Home,
-  BookOpen,
-  LayoutDashboard,
-  FileText,
-  Users,
-  Music,
-  Sparkles
+import {
+  Menu, X, LogOut, User, Home,
+  LayoutDashboard, Music, Users, Disc, Mic2,
+  ListMusic, CreditCard, BarChart2, Settings, Bell, Search, Headphones
 } from 'lucide-react';
+
+const NAV = [
+  { name: 'Dashboard',     icon: LayoutDashboard, id: 'dashboard' },
+  { name: 'Songs',         icon: Music,           id: 'songs' },
+  { name: 'Albums',        icon: Disc,            id: 'albums' },
+  { name: 'Artists',       icon: Mic2,            id: 'artists' },
+  { name: 'Playlists',     icon: ListMusic,       id: 'playlists' },
+  { name: 'Users',         icon: Users,           id: 'students' },
+  { name: 'Subscriptions', icon: CreditCard,      id: 'subscriptions' },
+  { name: 'Analytics',     icon: BarChart2,       id: 'analytics' },
+  { name: 'Settings',      icon: Settings,        id: 'settings' },
+];
+
+const Y = '#FFC107';
+const YL = '#FFF8E1';
 
 const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const handleLogout = () => { localStorage.removeItem('token'); navigate('/'); };
+  const handleGoHome = () => navigate('/');
 
-  const navigation = [
-    { name: 'Dashboard', icon: LayoutDashboard, id: 'dashboard' },
-    { name: 'Courses', icon: BookOpen, id: 'courses' },
-    { name: 'Music Notes', icon: FileText, id: 'notes' },
-    { name: 'Students', icon: Users, id: 'students' },
-  ];
+  const SidebarContent = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', fontFamily: "'Inter','Segoe UI',system-ui,sans-serif" }}>
+      {/* Logo */}
+      <div style={{ padding: '1.25rem 1.25rem 1rem', borderBottom: '1px solid #F3F4F6', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 36, height: 36, borderRadius: 10, background: Y, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Headphones size={20} color="#fff" />
+        </div>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: '1rem', color: '#111827', lineHeight: 1.2 }}>Raadhyam</div>
+          <div style={{ fontSize: '0.68rem', color: '#9CA3AF' }}>Admin Portal</div>
+        </div>
+        <button onClick={() => setSidebarOpen(false)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', display: sidebarOpen ? 'flex' : 'none', padding: 4 }}>
+          <X size={18} color="#9CA3AF" />
+        </button>
+      </div>
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/');
-  };
+      {/* Back to Home */}
+      <div style={{ padding: '0.75rem' }}>
+        <button onClick={handleGoHome} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500, color: '#6B7280', fontFamily: 'inherit' }}
+          onMouseEnter={e => { e.currentTarget.style.background = YL; e.currentTarget.style.color = '#92400E'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#6B7280'; }}>
+          <Home size={16} /> Back to Home
+        </button>
+      </div>
 
-  const handleGoHome = () => {
-    navigate('/');
-  };
+      {/* Nav */}
+      <nav style={{ flex: 1, overflowY: 'auto', padding: '0 0.75rem' }}>
+        <p style={{ fontSize: '0.65rem', fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.5rem 0.5rem 0.25rem', marginBottom: 2 }}>Menu</p>
+        {NAV.slice(0, 6).map(item => {
+          const Icon = item.icon;
+          const active = activeTab === item.id;
+          return (
+            <button key={item.id} onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: active ? 600 : 500, background: active ? Y : 'transparent', color: active ? '#fff' : '#6B7280', marginBottom: 2, textAlign: 'left' }}
+              onMouseEnter={e => { if (!active) e.currentTarget.style.background = YL; }}
+              onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}>
+              <Icon size={17} /> {item.name}
+            </button>
+          );
+        })}
+        <p style={{ fontSize: '0.65rem', fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '1rem 0.5rem 0.25rem', marginBottom: 2 }}>System</p>
+        {NAV.slice(6).map(item => {
+          const Icon = item.icon;
+          const active = activeTab === item.id;
+          return (
+            <button key={item.id} onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: active ? 600 : 500, background: active ? Y : 'transparent', color: active ? '#fff' : '#6B7280', marginBottom: 2, textAlign: 'left' }}
+              onMouseEnter={e => { if (!active) e.currentTarget.style.background = YL; }}
+              onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}>
+              <Icon size={17} /> {item.name}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* User */}
+      <div style={{ padding: '1rem', borderTop: '1px solid #F3F4F6', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 34, height: 34, borderRadius: '50%', background: Y, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <User size={16} color="#fff" />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Admin User</div>
+          <div style={{ fontSize: '0.7rem', color: '#9CA3AF' }}>Super Admin</div>
+        </div>
+        <button onClick={handleLogout} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: 4, borderRadius: 6 }}
+          onMouseEnter={e => e.currentTarget.style.color = '#EF4444'}
+          onMouseLeave={e => e.currentTarget.style.color = '#9CA3AF'}>
+          <LogOut size={15} />
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-amber-50/30 to-amber-50/20 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }}></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-amber-400/20 to-yellow-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-amber-400/10 to-amber-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '2s' }}></div>
-      </div>
-
-      {/* Mobile Sidebar */}
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#F9FAFB', fontFamily: "'Inter','Segoe UI',system-ui,sans-serif" }}>
+      {/* Mobile overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 flex z-50 md:hidden">
-          <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-md transition-opacity animate-fadeIn" onClick={() => setSidebarOpen(false)}></div>
-          
-          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-2xl animate-slideInLeft">
-            <div className="absolute top-0 right-0 -mr-12 pt-2">
-              <button
-                className="ml-1 flex items-center justify-center h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white transition-all hover:bg-white/20 hover:rotate-90 duration-300"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <X className="h-6 w-6 text-white" />
-              </button>
-            </div>
-            
-            <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-              {/* Logo with animation */}
-              <div className="flex-shrink-0 flex items-center px-4 mb-6 animate-fadeInDown">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-amber-700 rounded-xl blur-md opacity-50 animate-pulse"></div>
-                  <div className="relative w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-700 rounded-xl flex items-center justify-center shadow-lg">
-                    <Music className="h-6 w-6 text-white animate-bounce" style={{ animationDuration: '2s' }} />
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <span className="text-xl font-bold bg-gradient-to-r from-amber-500 via-amber-600 to-amber-600 bg-clip-text text-transparent animate-shimmer" style={{ backgroundSize: '200% auto' }}>Raadhyam</span>
-                  <p className="text-xs text-gray-500 font-medium flex items-center">
-                    <Sparkles size={10} className="mr-1 text-amber-500" />
-                    Admin Portal
-                  </p>
-                </div>
-              </div>
-              
-              {/* Back to Home Button */}
-              <div className="px-4 mb-4 animate-fadeInDown" style={{ animationDelay: '0.1s' }}>
-                <button
-                  onClick={handleGoHome}
-                  className="w-full flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-amber-600 bg-gradient-to-r from-gray-50 to-amber-50/30 hover:from-amber-50 hover:to-amber-100 rounded-xl transition-all duration-300 group shadow-sm hover:shadow-md"
-                >
-                  <Home size={18} className="mr-3 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300" />
-                  Back to Home
-                </button>
-              </div>
-
-              {/* Navigation */}
-              <nav className="mt-2 px-3 space-y-2">
-                {navigation.map((item, index) => (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveTab(item.id);
-                      setSidebarOpen(false);
-                    }}
-                    className={`${
-                      activeTab === item.id
-                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/40 scale-105'
-                        : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-100 hover:to-amber-50'
-                    } group flex items-center px-4 py-3 text-base font-medium rounded-xl w-full text-left transition-all duration-300 animate-fadeInDown`}
-                    style={{ animationDelay: `${0.2 + index * 0.1}s` }}
-                  >
-                    <item.icon
-                      className={`${
-                        activeTab === item.id ? 'text-white' : 'text-gray-400 group-hover:text-amber-600'
-                      } mr-3 flex-shrink-0 h-5 w-5 transition-all duration-300 group-hover:scale-110 ${activeTab === item.id ? 'animate-pulse' : ''}`}
-                    />
-                    {item.name}
-                  </button>
-                ))}
-              </nav>
-            </div>
-            
-            {/* User Profile */}
-            <div className="flex-shrink-0 border-t border-gray-200 p-4 bg-gradient-to-r from-gray-50 to-amber-50/30 animate-fadeInUp">
-              <div className="flex items-center w-full justify-between">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full blur-sm opacity-50 animate-pulse"></div>
-                    <div className="relative h-10 w-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-md">
-                      <User className="h-5 w-5 text-white" />
-                    </div>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-semibold text-gray-900">Admin User</p>
-                    <p className="text-xs font-medium text-gray-500">admin@raadhyam.com</p>
-                  </div>
-                </div>
-                <button 
-                  onClick={handleLogout}
-                  className="text-gray-400 hover:text-amber-600 ml-2 p-2 hover:bg-amber-50 rounded-lg transition-all duration-300 hover:rotate-12 hover:scale-110"
-                  title="Logout"
-                >
-                  <LogOut size={18} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40 }} />
       )}
 
-      {/* Desktop Sidebar */}
-      <div className="hidden md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-40">
-        <div className="flex-1 flex flex-col min-h-0 bg-white/80 backdrop-blur-xl shadow-2xl border-r border-gray-200/50">
-          <div className="flex-1 flex flex-col pt-6 pb-4 overflow-y-auto">
-            {/* Logo with animation */}
-            <div className="flex items-center flex-shrink-0 px-6 mb-8 animate-fadeInDown">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-amber-700 rounded-xl blur-md opacity-50 animate-pulse"></div>
-                <div className="relative w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-700 rounded-xl flex items-center justify-center shadow-lg">
-                  <Music className="h-7 w-7 text-white animate-bounce" style={{ animationDuration: '2s' }} />
-                </div>
-              </div>
-              <div className="ml-3">
-                <span className="text-2xl font-bold bg-gradient-to-r from-amber-500 via-amber-600 to-amber-600 bg-clip-text text-transparent animate-shimmer" style={{ backgroundSize: '200% auto' }}>Raadhyam</span>
-                <p className="text-xs text-gray-500 font-medium flex items-center">
-                  <Sparkles size={10} className="mr-1 text-amber-500 animate-pulse" />
-                  Admin Portal
-                </p>
-              </div>
-            </div>
+      {/* Sidebar */}
+      <aside style={{
+        position: 'fixed', top: 0, left: 0, height: '100vh', width: 220,
+        background: '#fff', borderRight: '1px solid #E5E7EB',
+        zIndex: 50, display: 'flex', flexDirection: 'column',
+      }} className="admin-sidebar">
+        <SidebarContent />
+      </aside>
 
-            {/* Back to Home Button */}
-            <div className="px-4 mb-6 animate-fadeInDown" style={{ animationDelay: '0.1s' }}>
-              <button
-                onClick={handleGoHome}
-                className="w-full flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-amber-600 bg-gradient-to-r from-gray-50 to-amber-50/30 hover:from-amber-50 hover:to-amber-100 rounded-xl transition-all duration-300 group shadow-sm hover:shadow-md"
-              >
-                <Home size={18} className="mr-3 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300" />
-                Back to Home
-              </button>
-            </div>
+      {/* Main */}
+      <div style={{ flex: 1, marginLeft: 220, display: 'flex', flexDirection: 'column', minWidth: 0 }} className="admin-main">
+        {/* Topbar */}
+        <header style={{ height: 60, background: '#fff', borderBottom: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', padding: '0 1.5rem', gap: 12, position: 'sticky', top: 0, zIndex: 30 }}>
+          <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280', padding: 4, display: 'none' }} className="admin-menu-btn">
+            <Menu size={22} />
+          </button>
 
-            {/* Navigation */}
-            <nav className="mt-2 flex-1 px-4 space-y-2">
-              {navigation.map((item, index) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`${
-                    activeTab === item.id
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/40 scale-105'
-                      : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-100 hover:to-amber-50'
-                  } group flex items-center px-4 py-3 text-sm font-medium rounded-xl w-full text-left transition-all duration-300 animate-fadeInDown`}
-                  style={{ animationDelay: `${0.2 + index * 0.1}s` }}
-                >
-                  <item.icon
-                    className={`${
-                      activeTab === item.id ? 'text-white' : 'text-gray-400 group-hover:text-amber-600'
-                    } mr-3 flex-shrink-0 h-5 w-5 transition-all duration-300 group-hover:scale-110 ${activeTab === item.id ? 'animate-pulse' : ''}`}
-                  />
-                  {item.name}
-                </button>
-              ))}
-            </nav>
+          {/* Search */}
+          <div style={{ flex: 1, maxWidth: 400, position: 'relative', marginLeft: 'auto' }}>
+            <Search size={15} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+            <input placeholder="Search songs, artists, users..." style={{ width: '100%', padding: '7px 12px 7px 32px', border: '1.5px solid #E5E7EB', borderRadius: 8, fontSize: '0.85rem', color: '#111827', background: '#F9FAFB', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+              onFocus={e => { e.target.style.borderColor = Y; e.target.style.background = '#fff'; }}
+              onBlur={e => { e.target.style.borderColor = '#E5E7EB'; e.target.style.background = '#F9FAFB'; }} />
           </div>
-          
-          {/* User Profile */}
-          <div className="flex-shrink-0 border-t border-gray-200 p-4 bg-gradient-to-r from-gray-50 to-amber-50/30 animate-fadeInUp">
-            <div className="flex items-center w-full">
-              <div className="flex-shrink-0 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full blur-sm opacity-50 animate-pulse"></div>
-                <div className="relative h-10 w-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-md">
-                  <User className="h-5 w-5 text-white" />
-                </div>
-              </div>
-              <div className="ml-3 flex-1">
-                <p className="text-sm font-semibold text-gray-900">Admin User</p>
-                <p className="text-xs font-medium text-gray-500">admin@raadhyam.com</p>
-              </div>
-              <button 
-                onClick={handleLogout}
-                className="ml-2 text-gray-400 hover:text-amber-600 p-2 hover:bg-amber-50 rounded-lg transition-all duration-300 hover:rotate-12 hover:scale-110"
-                title="Logout"
-              >
-                <LogOut size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="md:pl-72 flex flex-col flex-1 relative z-10">
-        {/* Mobile Header */}
-        <div className={`sticky top-0 z-30 md:hidden transition-all duration-300 ${
-          scrolled 
-            ? 'bg-white/90 backdrop-blur-xl shadow-lg' 
-            : 'bg-white/80 backdrop-blur-lg'
-        } border-b border-gray-200/50`}>
-          <div className="flex items-center justify-between px-4 py-3">
-            <button
-              className="inline-flex items-center justify-center h-10 w-10 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gradient-to-r hover:from-gray-100 hover:to-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-300 hover:scale-110"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <Menu className="h-6 w-6" />
-            </button>
-            <div className="flex items-center animate-fadeIn">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-amber-700 rounded-lg blur-sm opacity-50 animate-pulse"></div>
-                <div className="relative w-8 h-8 bg-gradient-to-br from-amber-500 to-amber-700 rounded-lg flex items-center justify-center">
-                  <Music className="h-5 w-5 text-white" />
-                </div>
-              </div>
-              <span className="ml-2 text-lg font-bold bg-gradient-to-r from-amber-500 to-amber-700 bg-clip-text text-transparent">Raadhyam</span>
+          {/* Notification */}
+          <button style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', padding: 8, borderRadius: 8, color: '#6B7280' }}
+            onMouseEnter={e => e.currentTarget.style.background = YL}
+            onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+            <Bell size={20} />
+            <span style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: '50%', background: '#EF4444', border: '2px solid #fff' }} />
+          </button>
+
+          {/* Avatar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 8, cursor: 'pointer', border: '1px solid #E5E7EB' }}
+            onMouseEnter={e => e.currentTarget.style.background = YL}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', background: Y, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <User size={14} color="#fff" />
             </div>
-            <div className="w-10"></div>
+            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#111827' }}>Admin</span>
           </div>
-        </div>
-        
-        {/* Main Content Area */}
-        <main className="flex-1">
-          <div className="py-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-              {children}
-            </div>
+        </header>
+
+        {/* Content */}
+        <main style={{ flex: 1, padding: '1.5rem', overflowY: 'auto' }}>
+          <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+            {children}
           </div>
         </main>
       </div>
 
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @media(max-width:768px){
+          .admin-sidebar{ transform: ${sidebarOpen ? 'translateX(0)' : 'translateX(-100%)'}; transition: transform .25s ease; }
+          .admin-main{ margin-left: 0 !important; }
+          .admin-menu-btn{ display: flex !important; }
         }
-        @keyframes fadeInDown {
-          from { opacity: 0; transform: translateY(-20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideInLeft {
-          from { transform: translateX(-100%); }
-          to { transform: translateX(0); }
-        }
-        @keyframes shimmer {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-        .animate-fadeIn { animation: fadeIn 0.5s ease-out; }
-        .animate-fadeInDown { animation: fadeInDown 0.6s ease-out both; }
-        .animate-fadeInUp { animation: fadeInUp 0.6s ease-out both; }
-        .animate-slideInLeft { animation: slideInLeft 0.3s ease-out; }
-        .animate-shimmer { animation: shimmer 3s linear infinite; }
       `}</style>
     </div>
   );
