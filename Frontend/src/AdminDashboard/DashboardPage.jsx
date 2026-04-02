@@ -1,125 +1,319 @@
-import { Card, SectionTitle, StatCard, ChartBox, Cover, Avatar, Badge, RowActions, SANS, TEXT, MUTED, BORDER, Y, YL } from './components/UI';
+import React, { useState, useEffect } from 'react';
+import { 
+  BookOpen, 
+  Users, 
+  FileText, 
+  TrendingUp,
+  Calendar,
+  BarChart3,
+  ArrowUp,
+  ArrowDown,
+  Clock,
+  Star,
+  Zap,
+  Award,
+  Activity
+} from 'lucide-react';
 
-const DashboardPage = () => (
-  <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem', fontFamily:SANS }}>
+const StatCard = ({ title, value, icon, color, bgColor, change, index }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [count, setCount] = useState(0);
 
-    {/* Header */}
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:8, marginBottom:'1rem' }}>
-      <div style={{ flex: '1 1 auto', minWidth: 0 }}>
-        <h1 style={{ fontSize:'1.2rem', fontWeight:700, color:TEXT, margin:0 }}>Dashboard</h1>
-        <p style={{ fontSize:'0.82rem', color:MUTED, margin:'2px 0 0' }}>Welcome back, Admin</p>
+  useEffect(() => {
+    setIsVisible(true);
+    // Animate counter
+    const duration = 2000;
+    const steps = 60;
+    const increment = value / steps;
+    let current = 0;
+    
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= value) {
+        setCount(value);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, duration / steps);
+
+    return () => clearInterval(timer);
+  }, [value]);
+
+  return (
+    <div 
+      className={`group relative bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
+      style={{ transitionDelay: `${index * 100}ms` }}
+    >
+      {/* Animated background gradient */}
+      <div className={`absolute inset-0 ${bgColor} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
+      <div className={`absolute top-0 right-0 w-40 h-40 ${bgColor} opacity-5 rounded-full blur-3xl group-hover:opacity-20 group-hover:scale-150 transition-all duration-700`}></div>
+      
+      {/* Shine effect */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
       </div>
-      <div style={{ fontSize:'0.82rem', color:MUTED, background:'#fff', border:`1px solid ${BORDER}`, borderRadius:8, padding:'6px 12px', whiteSpace:'nowrap' }}>
-        📅 Today's Date
-      </div>
-    </div>
-
-    {/* Stat cards */}
-    <div className="stat-row">
-      <StatCard label="Total Users"   icon="👥" color="#3B82F6" bg="#EFF6FF" />
-      <StatCard label="Total Songs"   icon="🎵" color="#8B5CF6" bg="#F5F3FF" />
-      <StatCard label="Total Artists" icon="🎤" color="#10B981" bg="#ECFDF5" />
-      <StatCard label="Revenue"       icon="💰" color={Y}       bg={YL}      />
-    </div>
-
-    {/* Charts */}
-    <div className="rg-3">
-      <Card><SectionTitle>User Growth</SectionTitle><ChartBox label="Line chart — user growth" /></Card>
-      <Card><SectionTitle>Streams / Plays</SectionTitle><ChartBox label="Bar chart — streams" /></Card>
-      <Card><SectionTitle>Revenue</SectionTitle><ChartBox label="Bar chart — revenue" /></Card>
-    </div>
-
-    {/* Recent Songs + Recent Activity */}
-    <div className="rg-2">
-
-      {/* Recent Songs */}
-      <Card noPad>
-        <div style={{ padding:'1rem 1.25rem', borderBottom:`1px solid ${BORDER}`, display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:8 }}>
-          <h3 style={{ fontSize:'0.92rem', fontWeight:700, color:TEXT, margin:0 }}>Recent Songs</h3>
-          <button style={{ fontSize:'0.78rem', color:Y, background:'none', border:'none', cursor:'pointer', fontWeight:600, fontFamily:SANS, whiteSpace:'nowrap' }}>View all →</button>
-        </div>
-        {[1,2,3,4].map(i => (
-          <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 1.25rem', borderBottom:`1px solid ${BORDER}`, flexWrap:'wrap' }}>
-            <Cover size={34} />
-            <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ width:'70%', height:11, background:'#F3F4F6', borderRadius:4, marginBottom:5 }} />
-              <div style={{ width:'50%', height:10, background:'#F3F4F6', borderRadius:4 }} />
-            </div>
-            <Badge status="Active" />
-            <RowActions active={true} />
+      
+      <div className="relative">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">{title}</p>
+            <p className="text-4xl font-bold text-gray-900 tabular-nums">{count}</p>
           </div>
-        ))}
-      </Card>
-
-      {/* Recent Activity */}
-      <Card noPad>
-        <div style={{ padding:'1rem 1.25rem', borderBottom:`1px solid ${BORDER}` }}>
-          <h3 style={{ fontSize:'0.92rem', fontWeight:700, color:TEXT, margin:0 }}>Recent Activity</h3>
+          <div className={`relative p-4 rounded-2xl ${bgColor} ${color} shadow-lg group-hover:scale-110 group-hover:rotate-12 transition-all duration-500`}>
+            {React.cloneElement(icon, { size: 28, className: 'relative z-10' })}
+            <div className={`absolute inset-0 ${bgColor} rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity`}></div>
+          </div>
         </div>
-        {[
-          { icon:'👤', text:'New user registered', time:'2 min ago' },
-          { icon:'🎵', text:'New song uploaded',   time:'15 min ago' },
-          { icon:'💳', text:'New subscription',    time:'1 hr ago' },
-          { icon:'🎤', text:'Artist profile updated', time:'3 hr ago' },
-          { icon:'🗑️', text:'Album deleted',       time:'5 hr ago' },
-        ].map((a,i) => (
-          <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 1.25rem', borderBottom:`1px solid ${BORDER}` }}>
-            <div style={{ width:32, height:32, borderRadius:'50%', background:YL, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.9rem', flexShrink:0 }}>{a.icon}</div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:'0.82rem', color:TEXT, fontWeight:500 }}>{a.text}</div>
-              <div style={{ fontSize:'0.72rem', color:MUTED, marginTop:2 }}>{a.time}</div>
+        
+        {change && (
+          <div className="flex items-center space-x-2">
+            <div className={`flex items-center px-3 py-1.5 rounded-full text-sm font-bold ${
+              change > 0 
+                ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' 
+                : 'bg-gradient-to-r from-amber-500 to-rose-500 text-white'
+            } shadow-lg`}>
+              {change > 0 ? <ArrowUp size={16} className="mr-1 animate-bounce" /> : <ArrowDown size={16} className="mr-1 animate-bounce" />}
+              {Math.abs(change)}%
+            </div>
+            <span className="text-sm text-gray-500 font-medium">vs last month</span>
+          </div>
+        )}
+      </div>
+
+      {/* Corner decoration */}
+      <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-gray-100/50 to-transparent rounded-tl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    </div>
+  );
+};
+
+const DashboardPage = ({ dashboardStats, loading }) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-amber-200 rounded-full animate-spin"></div>
+          <div className="w-16 h-16 border-t-4 border-amber-500 rounded-full animate-spin absolute top-0 left-0"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Zap className="w-6 h-6 text-amber-600 animate-pulse" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Animated Header */}
+      <div className={`relative transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-8'}`}>
+        {/* Glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 via-orange-600/20 to-amber-500/20 rounded-3xl blur-3xl animate-pulse"></div>
+        
+        <div className="relative bg-gradient-to-r from-amber-500 via-amber-600 to-amber-600 rounded-2xl p-8 shadow-2xl overflow-hidden">
+          {/* Animated background pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
+          </div>
+          
+          {/* Floating elements */}
+          <div className="absolute top-4 right-4 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-pulse"></div>
+          <div className="absolute bottom-4 left-4 w-24 h-24 bg-white/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          
+          <div className="relative flex items-center justify-between flex-wrap gap-4">
+            <div className="flex-1">
+              <div className="flex items-center space-x-3 mb-3">
+                <Activity className="w-8 h-8 text-white animate-pulse" />
+                <h2 className="text-4xl font-bold text-white">Dashboard Overview</h2>
+              </div>
+              <p className="text-amber-100 flex items-center text-lg">
+                <Clock size={18} className="mr-2 animate-spin" style={{ animationDuration: '3s' }} />
+                Welcome back! Here's your performance today
+              </p>
+            </div>
+            <div className="hidden md:block">
+              <div className="bg-white/20 backdrop-blur-md rounded-2xl px-6 py-4 border border-white/30 shadow-xl hover:scale-105 transition-transform duration-300">
+                <p className="text-amber-100 text-sm font-semibold mb-1 flex items-center">
+                  <Calendar size={14} className="mr-2" />
+                  Today
+                </p>
+                <p className="text-white text-xl font-bold">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+              </div>
             </div>
           </div>
-        ))}
-      </Card>
-    </div>
-
-    {/* Top Artists */}
-    <Card noPad>
-      <div style={{ padding:'1rem 1.25rem', borderBottom:`1px solid ${BORDER}`, display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:8 }}>
-        <h3 style={{ fontSize:'0.92rem', fontWeight:700, color:TEXT, margin:0 }}>Top Artists</h3>
-        <button style={{ fontSize:'0.78rem', color:Y, background:'none', border:'none', cursor:'pointer', fontWeight:600, fontFamily:SANS, whiteSpace:'nowrap' }}>View all →</button>
+        </div>
       </div>
-      <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
-        <table style={{ width:'100%', borderCollapse:'collapse', fontFamily:SANS, fontSize:'0.85rem', minWidth:700 }}>
-          <thead>
-            <tr style={{ background:'#F9FAFB' }}>
-              {['#','Artist','Genre','Followers','Songs','Status','Actions'].map(h => (
-                <th key={h} style={{ padding:'9px 14px', textAlign:'left', fontSize:'0.72rem', fontWeight:600, color:MUTED, textTransform:'uppercase', letterSpacing:'0.06em', whiteSpace:'nowrap' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {[1,2,3].map(i => (
-              <tr key={i} style={{ borderTop:`1px solid ${BORDER}` }}
-                onMouseEnter={e=>e.currentTarget.style.background='#FAFAFA'}
-                onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
-                <td style={{ padding:'10px 14px', color:MUTED, fontSize:'0.8rem' }}>#{i}</td>
-                <td style={{ padding:'10px 14px' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:9 }}>
-                    <Avatar name="A" size={32} />
-                    <div style={{ width:80, height:11, background:'#F3F4F6', borderRadius:4 }} />
+
+      {/* Stats Grid with staggered animation */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard
+          title="Total Courses"
+          value={dashboardStats.totalCourses || 0}
+          icon={<BookOpen />}
+          color="text-blue-600"
+          bgColor="bg-blue-500"
+          change={12}
+          index={0}
+        />
+        <StatCard
+          title="Published Courses"
+          value={dashboardStats.publishedCourses || 0}
+          icon={<BookOpen />}
+          color="text-green-600"
+          bgColor="bg-green-500"
+          change={8}
+          index={1}
+        />
+        <StatCard
+          title="Total Enrollments"
+          value={dashboardStats.totalEnrollments || 0}
+          icon={<Users />}
+          color="text-orange-600"
+          bgColor="bg-orange-500"
+          change={15}
+          index={2}
+        />
+        <StatCard
+          title="Music Notes"
+          value={dashboardStats.totalNotes || 0}
+          icon={<FileText />}
+          color="text-purple-600"
+          bgColor="bg-purple-500"
+          change={5}
+          index={3}
+        />
+      </div>
+
+      {/* Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Recent Enrollments */}
+        <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 ${
+          isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
+        }`} style={{ transitionDelay: '400ms' }}>
+          <div className="relative px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-blue-50 via-white to-blue-50/50 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent"></div>
+            <h3 className="relative text-xl font-bold text-gray-900 flex items-center">
+              <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl mr-3 shadow-lg">
+                <Users size={22} className="text-white" />
+              </div>
+              Recent Enrollments
+              <Award className="ml-auto text-blue-500 animate-pulse" size={20} />
+            </h3>
+          </div>
+          <div className="p-6">
+            <div className="space-y-3">
+              {dashboardStats.recentEnrollments?.slice(0, 5).map((enrollment, index) => (
+                <div 
+                  key={enrollment._id} 
+                  className="flex items-center justify-between p-4 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent transition-all duration-300 group cursor-pointer border border-transparent hover:border-blue-200 hover:shadow-md hover:-translate-x-1"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                      <div className="relative w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <span className="text-white font-bold text-lg">{(enrollment.user?.name || 'U')[0]}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{enrollment.user?.name || 'Unknown User'}</p>
+                      <p className="text-sm text-gray-500 flex items-center mt-1">
+                        <BookOpen size={14} className="mr-1.5 text-blue-500" />
+                        {enrollment.course?.title || 'Unknown Course'}
+                      </p>
+                    </div>
                   </div>
-                </td>
-                <td style={{ padding:'10px 14px' }}><div style={{ width:60, height:11, background:'#F3F4F6', borderRadius:4 }} /></td>
-                <td style={{ padding:'10px 14px' }}><div style={{ width:50, height:11, background:'#F3F4F6', borderRadius:4 }} /></td>
-                <td style={{ padding:'10px 14px' }}><div style={{ width:30, height:11, background:'#F3F4F6', borderRadius:4 }} /></td>
-                <td style={{ padding:'10px 14px' }}><Badge status="Active" /></td>
-                <td style={{ padding:'10px 14px' }}><RowActions active={true} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Card>
+                  <div className="text-right">
+                    <div className="flex items-center text-xs font-semibold text-gray-500 bg-gray-100 group-hover:bg-blue-100 group-hover:text-blue-600 px-3 py-2 rounded-full transition-colors">
+                      <Calendar size={14} className="mr-1.5" />
+                      {new Date(enrollment.enrolledAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-      <style>{`
-        @media(max-width:640px){
-          .dash-charts{grid-template-columns:1fr !important;}
-          .dash-two{grid-template-columns:1fr !important;}
+        {/* Popular Courses */}
+        <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 ${
+          isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
+        }`} style={{ transitionDelay: '500ms' }}>
+          <div className="relative px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-green-50 via-white to-green-50/50 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent"></div>
+            <h3 className="relative text-xl font-bold text-gray-900 flex items-center">
+              <div className="p-2.5 bg-gradient-to-br from-green-500 to-green-600 rounded-xl mr-3 shadow-lg">
+                <TrendingUp size={22} className="text-white" />
+              </div>
+              Popular Courses
+              <Zap className="ml-auto text-green-500 animate-pulse" size={20} />
+            </h3>
+          </div>
+          <div className="p-6">
+            <div className="space-y-3">
+              {dashboardStats.popularCourses?.slice(0, 5).map((course, index) => (
+                <div 
+                  key={course._id} 
+                  className="flex items-center justify-between p-4 rounded-xl hover:bg-gradient-to-r hover:from-green-50 hover:to-transparent transition-all duration-300 group cursor-pointer border border-transparent hover:border-green-200 hover:shadow-md hover:translate-x-1"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <div className="flex items-center space-x-4 flex-1 min-w-0">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-600 rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                      <div className="relative w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
+                        <span className="text-white font-bold text-lg">#{index + 1}</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-900 truncate group-hover:text-green-600 transition-colors">{course.title}</p>
+                      <div className="flex items-center space-x-2 text-xs mt-2">
+                        <span className="flex items-center bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full font-semibold">
+                          <Users size={12} className="mr-1" />
+                          {course.stats?.enrolledStudents || 0}
+                        </span>
+                        <span className="flex items-center bg-yellow-100 text-yellow-700 px-2.5 py-1 rounded-full font-semibold">
+                          <Star size={12} className="mr-1 fill-current" />
+                          {course.stats?.rating?.toFixed(1) || '0.0'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <div className="w-24 bg-gray-200 rounded-full h-2.5 overflow-hidden shadow-inner">
+                      <div 
+                        className="bg-gradient-to-r from-green-500 via-green-600 to-green-500 h-2.5 rounded-full transition-all duration-1000 animate-shimmer" 
+                        style={{ 
+                          width: `${Math.min(100, (course.stats?.enrolledStudents || 0) * 10)}%`,
+                          backgroundSize: '200% 100%'
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        .animate-shimmer {
+          animation: shimmer 3s linear infinite;
         }
       `}</style>
-  </div>
-);
+    </div>
+  );
+};
 
 export default DashboardPage;
