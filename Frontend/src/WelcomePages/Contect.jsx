@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import FooterPage from './FooterPage';
 import NavBarpage from './NavBarpage';
-import heroBg from '../assets/hero-bg.jpg';
 
 const ContactPage = () => {
     const [formData, setFormData] = useState({
@@ -120,7 +119,9 @@ ${formData.message}
             <NavBarpage />
 
             <section className="relative min-h-[74vh] flex items-center justify-center overflow-hidden pt-20 sm:pt-24">
-                <img src={heroBg} alt="Raadhyam contact hero" className="absolute inset-0 h-full w-full object-cover" />
+                <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover">
+                  <source src={`${import.meta.env.BASE_URL}Video_of_Slow_Moving_Waves.mp4`} type="video/mp4" />
+                </video>
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-900/72 to-slate-950/88" />
 
                 <div className="relative z-10 max-w-4xl px-4 text-center">

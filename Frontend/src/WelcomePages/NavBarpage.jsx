@@ -4,8 +4,14 @@ import { useState, useEffect } from "react";
 const css = `
   @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap");
   .rn { font-family:"Manrope",system-ui,sans-serif; position:fixed; inset:0 0 auto 0; z-index:9999; transition:background .3s,box-shadow .3s,border-color .3s; }
-  .rn.top { background:transparent; border-bottom:1px solid rgba(255,255,255,.08); box-shadow:none; }
-  .rn.scrolled { background:rgba(12,12,12,.95); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,.05); box-shadow:0 10px 30px rgba(0,0,0,.5); }
+  .rn.top { background:#ffffff; border-bottom:1px solid rgba(0,0,0,.08); box-shadow:0 2px 8px rgba(0,0,0,.06); }
+  .rn.top .rn-a { color:rgba(0,0,0,.7); }
+  .rn.top .rn-a:hover,.rn.top .rn-a.on { color:#ef7e1a; }
+  .rn.top .rn-hl { background:rgba(0,0,0,0.8); }
+  .rn.scrolled { background:#ffffff; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border-bottom:1px solid rgba(0,0,0,.1); box-shadow:0 4px 12px rgba(0,0,0,.08); }
+  .rn.scrolled .rn-a { color:rgba(0,0,0,.7); }
+  .rn.scrolled .rn-a:hover,.rn.scrolled .rn-a.on { color:#ef7e1a; }
+  .rn.scrolled .rn-hl { background:rgba(0,0,0,0.8); }
   .rn-wrap { max-width:1280px; margin:0 auto; padding:0 1.5rem; }
   .rn-bar { display:flex; align-items:center; justify-content:space-between; height:72px; transition:height .3s; }
   .rn.scrolled .rn-bar { height:64px; }
@@ -27,7 +33,7 @@ const css = `
   .rn-hbg.open .rn-hl:nth-child(3) { transform:rotate(-45deg) translate(5px,-6px); background:#ef7e1a; }
   .rn-mob { overflow:hidden; max-height:0; opacity:0; transition:max-height .4s cubic-bezier(.4,0,.2,1),opacity .3s ease; }
   .rn-mob.open { max-height:600px; opacity:1; }
-  .rn-mob-inner { padding:.5rem 0 1.5rem; display:flex; flex-direction:column; gap:.25rem; background:rgba(15,15,15,.98); border:1px solid rgba(255,255,255,.08); border-radius:16px; margin-bottom:10px; box-shadow:0 10px 25px rgba(0,0,0,.5); }
+  .rn-mob-inner { padding:.5rem 0 1.5rem; display:flex; flex-direction:column; gap:.25rem; background:rgba(115,115,115,.98); border:1px solid rgba(255,255,255,.08); border-radius:16px; margin-bottom:10px; box-shadow:0 10px 25px rgba(0,0,0,.5); }
   .rn-ma { display:block; padding:.875rem 1.25rem; color:rgba(255,255,255,.85); font-size:.9375rem; font-weight:700; border-radius:8px; text-decoration:none; transition:background .2s,color .2s; }
   .rn-ma:hover { background:rgba(239,126,26,.1); color:#ef7e1a; }
   .rn-ma.on { background:rgba(239,126,26,.15); color:#f4a14f; font-weight:800; }
