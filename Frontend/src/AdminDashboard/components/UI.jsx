@@ -35,31 +35,41 @@ export const SectionTitle = ({ children, action }) => (
 );
 
 /* ── Buttons ───────────────────────────────────────────────────────────── */
-export const PrimaryBtn = ({ children, icon:Icon, small, style, onClick }) => (
-  <button onClick={onClick} style={{ display:'inline-flex', alignItems:'center', gap:6,
-    padding:small?'6px 12px':'8px 16px', background:Y, border:'none', borderRadius:8,
-    fontSize:small?'0.78rem':'0.85rem', fontWeight:600, color:'#fff', cursor:'pointer',
-    fontFamily:SANS, whiteSpace:'nowrap', ...style }}>
+export const PrimaryBtn = ({ children, icon:Icon, small, style, onClick, disabled }) => (
+  <button 
+    onClick={onClick} 
+    disabled={disabled}
+    style={{ display:'inline-flex', alignItems:'center', gap:6,
+      padding:small?'6px 12px':'8px 16px', background:Y, border:'none', borderRadius:8,
+      fontSize:small?'0.78rem':'0.85rem', fontWeight:600, color:'#fff', cursor: disabled ? 'not-allowed' : 'pointer',
+      fontFamily:SANS, whiteSpace:'nowrap', opacity: disabled ? 0.6 : 1, ...style }}>
     {Icon && <Icon size={small?13:15} />}{children}
   </button>
 );
 
-export const OutlineBtn = ({ children, icon:Icon, danger, small, onClick }) => (
-  <button onClick={onClick} style={{ display:'inline-flex', alignItems:'center', gap:6,
-    padding:small?'5px 10px':'7px 14px', background:'#fff',
-    border:`1.5px solid ${danger?'#FCA5A5':BORDER}`, borderRadius:8,
-    fontSize:small?'0.78rem':'0.85rem', fontWeight:500,
-    color:danger?'#EF4444':MUTED, cursor:'pointer', fontFamily:SANS, whiteSpace:'nowrap' }}>
+export const OutlineBtn = ({ children, icon:Icon, danger, small, onClick, disabled }) => (
+  <button 
+    onClick={onClick} 
+    disabled={disabled}
+    style={{ display:'inline-flex', alignItems:'center', gap:6,
+      padding:small?'5px 10px':'7px 14px', background:'#fff',
+      border:`1.5px solid ${danger?'#FCA5A5':BORDER}`, borderRadius:8,
+      fontSize:small?'0.78rem':'0.85rem', fontWeight:500,
+      color:danger?'#EF4444':MUTED, cursor: disabled ? 'not-allowed' : 'pointer', 
+      fontFamily:SANS, whiteSpace:'nowrap', opacity: disabled ? 0.6 : 1 }}>
     {Icon && <Icon size={small?13:15} />}{children}
   </button>
 );
 
-export const IconBtn = ({ icon:Icon, color='#6B7280', title, bg }) => (
-  <button title={title} style={{ padding:6, borderRadius:6, border:'none',
-    background:bg||'transparent', cursor:'pointer', color,
-    display:'inline-flex', alignItems:'center', justifyContent:'center' }}
-    onMouseEnter={e=>e.currentTarget.style.background=bg||'#F3F4F6'}
-    onMouseLeave={e=>e.currentTarget.style.background=bg||'transparent'}>
+export const IconBtn = ({ icon:Icon, color='#6B7280', title, bg, onClick }) => (
+  <button 
+    title={title} 
+    onClick={onClick}
+    style={{ padding:6, borderRadius:6, border:'none',
+      background:bg||'transparent', cursor: onClick ? 'pointer' : 'default', color,
+      display:'inline-flex', alignItems:'center', justifyContent:'center' }}
+    onMouseEnter={e=>onClick && (e.currentTarget.style.background=bg||'#F3F4F6')}
+    onMouseLeave={e=>onClick && (e.currentTarget.style.background=bg||'transparent')}>
     <Icon size={14} />
   </button>
 );
@@ -74,6 +84,10 @@ export const Badge = ({ status }) => {
     Free:     {bg:'#DBEAFE',color:'#1E40AF'},
     Pending:  {bg:'#FEF3C7',color:'#92400E'},
     Cancelled:{bg:'#FEE2E2',color:'#991B1B'},
+    Suspended:{bg:'#FEE2E2',color:'#991B1B'},
+    Deleted:  {bg:'#F3F4F6',color:MUTED},
+    'Monthly Premium':  {bg:'#EDE9FE',color:'#5B21B6'},
+    'Annual Premium':   {bg:'#EDE9FE',color:'#5B21B6'},
   };
   const s = map[status]||{bg:'#F3F4F6',color:MUTED};
   return <span style={{ display:'inline-block', padding:'2px 10px', borderRadius:20,
@@ -92,17 +106,22 @@ export const Toggle = ({ active }) => (
 );
 
 /* ── Form inputs ───────────────────────────────────────────────────────── */
-export const Input = ({ label, placeholder, type='text', required, hint }) => (
+export const Input = ({ label, placeholder, type='text', required, hint, value, onChange, disabled }) => (
   <div style={{ marginBottom:'1rem' }}>
     {label && <label style={{ display:'block', fontSize:'0.82rem', fontWeight:600,
       color:TEXT, marginBottom:5, fontFamily:SANS }}>
       {label}{required&&<span style={{color:'#EF4444'}}> *</span>}
     </label>}
-    <input type={type} placeholder={placeholder}
+    <input 
+      type={type} 
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
       style={{ width:'100%', padding:'9px 12px', border:`1.5px solid ${BORDER}`,
-        borderRadius:8, fontSize:'0.88rem', color:TEXT, background:'#fff',
-        outline:'none', fontFamily:SANS, boxSizing:'border-box' }}
-      onFocus={e=>e.target.style.borderColor=Y}
+        borderRadius:8, fontSize:'0.88rem', color:TEXT, background: disabled ? '#F3F4F6' : '#fff',
+        outline:'none', fontFamily:SANS, boxSizing:'border-box', cursor: disabled ? 'not-allowed' : 'text' }}
+      onFocus={e=>!disabled && (e.target.style.borderColor=Y)}
       onBlur={e=>e.target.style.borderColor=BORDER} />
     {hint && <p style={{ fontSize:'0.72rem', color:MUTED, margin:'3px 0 0', fontFamily:SANS }}>{hint}</p>}
   </div>
@@ -121,17 +140,21 @@ export const Textarea = ({ label, placeholder, rows=4 }) => (
   </div>
 );
 
-export const Select = ({ label, options, required }) => (
+export const Select = ({ label, options, required, value, onChange, disabled }) => (
   <div style={{ marginBottom:'1rem' }}>
     {label && <label style={{ display:'block', fontSize:'0.82rem', fontWeight:600,
       color:TEXT, marginBottom:5, fontFamily:SANS }}>
       {label}{required&&<span style={{color:'#EF4444'}}> *</span>}
     </label>}
-    <select style={{ width:'100%', padding:'9px 12px', border:`1.5px solid ${BORDER}`,
-      borderRadius:8, fontSize:'0.88rem', color:TEXT, background:'#fff',
-      outline:'none', fontFamily:SANS, boxSizing:'border-box', cursor:'pointer' }}>
+    <select 
+      value={value || ''}
+      onChange={onChange}
+      disabled={disabled}
+      style={{ width:'100%', padding:'9px 12px', border:`1.5px solid ${BORDER}`,
+        borderRadius:8, fontSize:'0.88rem', color:TEXT, background: disabled ? '#F3F4F6' : '#fff',
+        outline:'none', fontFamily:SANS, boxSizing:'border-box', cursor: disabled ? 'not-allowed' : 'pointer' }}>
       <option value="">— Select —</option>
-      {options.map(o=><option key={o}>{o}</option>)}
+      {options.map(o=><option key={o} value={o}>{o}</option>)}
     </select>
   </div>
 );
@@ -153,12 +176,16 @@ export const UploadBox = ({ label, accept, required }) => (
 );
 
 /* ── Search + filter toolbar ───────────────────────────────────────────── */
-export const Toolbar = ({ searchPlaceholder, filters, sortOptions }) => (
+export const Toolbar = ({ searchPlaceholder, filters, sortOptions, searchValue, onSearchChange, activeFilter, onFilterChange }) => (
   <div className="toolbar-row">
     <div style={{ position:'relative', flex:'1 1 160px', minWidth:140, maxWidth: '100%' }}>
       <span style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)',
         color:MUTED, fontSize:14, pointerEvents:'none' }}>🔍</span>
-      <input placeholder={searchPlaceholder||'Search...'} style={{ width:'100%',
+      <input 
+        placeholder={searchPlaceholder||'Search...'} 
+        value={searchValue || ''}
+        onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+        style={{ width:'100%',
         padding:'7px 10px 7px 30px', border:`1.5px solid ${BORDER}`, borderRadius:8,
         fontSize:'0.85rem', color:TEXT, background:'#F9FAFB', outline:'none',
         fontFamily:SANS, boxSizing:'border-box' }}
@@ -166,11 +193,14 @@ export const Toolbar = ({ searchPlaceholder, filters, sortOptions }) => (
         onBlur={e=>{e.target.style.borderColor=BORDER;e.target.style.background='#F9FAFB';}} />
     </div>
     {filters && (
-      <select style={{ padding:'7px 10px', border:`1.5px solid ${BORDER}`, borderRadius:8,
+      <select 
+        value={activeFilter || 'All'}
+        onChange={(e) => onFilterChange && onFilterChange(e.target.value)}
+        style={{ padding:'7px 10px', border:`1.5px solid ${BORDER}`, borderRadius:8,
         fontSize:'0.82rem', color:TEXT, background:'#fff', outline:'none',
         fontFamily:SANS, cursor:'pointer', minWidth:120, boxSizing:'border-box' }}>
         <option>All Status</option>
-        {filters.map(f=><option key={f}>{f}</option>)}
+        {filters.map(f=><option key={f} value={f}>{f}</option>)}
       </select>
     )}
     {sortOptions && (
@@ -271,20 +301,20 @@ export const FormGrid = ({ children }) => (
     className="form-2col">{children}</div>
 );
 
-export const FormActions = ({ submitLabel='Save', onCancel }) => (
+export const FormActions = ({ submitLabel='Save', onCancel, disabled }) => (
   <div style={{ display:'flex', gap:10, marginTop:'0.5rem', paddingTop:'1rem',
     borderTop:`1px solid ${BORDER}` }}>
-    <PrimaryBtn>{submitLabel}</PrimaryBtn>
-    <OutlineBtn>Cancel</OutlineBtn>
+    <PrimaryBtn disabled={disabled}>{submitLabel}</PrimaryBtn>
+    {onCancel && <OutlineBtn onClick={onCancel}>Cancel</OutlineBtn>}
   </div>
 );
 
 /* ── Row action group ──────────────────────────────────────────────────── */
-export const RowActions = ({ onView, onEdit, onDelete, active }) => (
+export const RowActions = ({ onView, onEdit, onDelete, active, hideEdit }) => (
   <div style={{ display:'flex', gap:2, alignItems:'center', flexWrap:'nowrap' }}>
-    <IconBtn icon={EyeIcon}   color="#3B82F6" title="View"   />
-    <IconBtn icon={EditIcon}  color="#10B981" title="Edit"   />
-    <IconBtn icon={TrashIcon} color="#EF4444" title="Delete" />
+    {onView && <IconBtn icon={EyeIcon} color="#3B82F6" title="View" onClick={onView} />}
+    {!hideEdit && onEdit && <IconBtn icon={EditIcon} color="#10B981" title="Edit" onClick={onEdit} />}
+    {onDelete && <IconBtn icon={TrashIcon} color="#EF4444" title="Delete" onClick={onDelete} />}
     <Toggle active={active} />
   </div>
 );
@@ -317,6 +347,53 @@ export const SkeletonRows = ({ cols=5, rows=5, checkable }) => (
     ))}
   </>
 );
+
+/* ── Alert / Notification ───────────────────────────────────────────── */
+export const Alert = ({ type = 'info', message, onClose }) => {
+  const styles = {
+    success: { bg: '#D1FAE5', border: '#10B981', color: '#065F46', icon: '✓' },
+    error:   { bg: '#FEE2E2', border: '#EF4444', color: '#991B1B', icon: '✕' },
+    warning: { bg: '#FEF3C7', border: '#F59E0B', color: '#92400E', icon: '⚠' },
+    info:    { bg: '#DBEAFE', border: '#3B82F6', color: '#1E40AF', icon: 'ℹ' },
+  };
+  const s = styles[type] || styles.info;
+  
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.75rem',
+      padding: '0.875rem 1rem',
+      background: s.bg,
+      border: `1px solid ${s.border}`,
+      borderRadius: 10,
+      marginBottom: '1rem',
+      fontFamily: SANS,
+      fontSize: '0.85rem',
+      color: s.color,
+      animation: 'fadeIn 0.2s ease-out'
+    }}>
+      <span style={{ fontSize: '1rem', fontWeight: 700 }}>{s.icon}</span>
+      <span style={{ flex: 1 }}>{message}</span>
+      {onClose && (
+        <button 
+          onClick={onClose}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            color: s.color,
+            fontSize: '1.2rem',
+            padding: '0 4px',
+            lineHeight: 1
+          }}
+        >
+          ×
+        </button>
+      )}
+    </div>
+  );
+};
 
 /* ── Avatar ────────────────────────────────────────────────────────────── */
 export const Avatar = ({ name, size=34 }) => (

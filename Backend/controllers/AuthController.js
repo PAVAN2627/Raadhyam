@@ -50,47 +50,55 @@ const isValidUsername = (username) => {
  */
 export const registerUser = async (req, res) => {
   try {
-    const { email, username, password } = req.body;
+    const { email, name, password } = req.body;
 
     // Input validation with detailed messages for development
-    if (!email || !username || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Email, username, and password are required" 
+    if (!email || !name || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email, name, and password are required"
       });
     }
 
     if (!isValidEmail(email)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid email format" 
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format"
       });
     }
 
-    if (!isValidUsername(username)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Username must be 3-30 alphanumeric characters" 
+    if (name.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: "Name must be at least 2 characters"
       });
     }
 
     if (!isStrongPassword(password)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Password must be at least 8 characters with one letter and one number" 
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters with one letter and one number"
       });
     }
 
-    // Check for existing user (email or username)
-    const existingUser = await User.findOne({
-      $or: [{ email: email.toLowerCase() }, { username: username.toLowerCase() }]
-    });
+    // Generate a unique username from the name
+    const baseUsername = name.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
+    let username = baseUsername;
+    let counter = 1;
+    
+    // Ensure username is unique
+    while (await User.findOne({ username })) {
+      username = `${baseUsername}_${counter}`;
+      counter++;
+    }
+
+    // Check for existing user by email
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
 
     if (existingUser) {
-      // Non-enumerating message - don't reveal which field is duplicated
-      return res.status(400).json({ 
-        success: false, 
-        message: "Email or username already exists" 
+      return res.status(400).json({
+        success: false,
+        message: "Email already exists"
       });
     }
 
@@ -101,9 +109,9 @@ export const registerUser = async (req, res) => {
     // Create new user
     const newUser = await User.create({
       email: email.toLowerCase(),
-      username: username.toLowerCase(),
+      username,
       password: hashedPassword,
-      name: username // Use username as default name
+      name: name.trim()
     });
 
     res.status(201).json({

@@ -33,30 +33,30 @@ const router = express.Router();
 // verifyToken: verifies user is authenticated
 // isAdmin: verifies user has admin role
 
-router.get('/admin/dashboard/stats', verifyToken, isAdmin, getDashboardStats);
+router.get('/dashboard/stats', verifyToken, isAdmin, getDashboardStats);
 
-router.post('/admin/courses', verifyToken, isAdmin, createCourse);
-router.get('/admin/courses', verifyToken, isAdmin, getAllCoursesAdmin);
-router.get('/admin/courses/:id', verifyToken, isAdmin, getCourseByIdAdmin);
-router.put('/admin/courses/:id', verifyToken, isAdmin, updateCourse);
-router.delete('/admin/courses/:id', verifyToken, isAdmin, deleteCourseAdmin);
-router.post('/admin/courses/generate-slug', verifyToken, isAdmin, generateCourseSlug);
-router.post('/admin/courses/validate', verifyToken, isAdmin, validateCourse);
+router.post('/courses', verifyToken, isAdmin, createCourse);
+router.get('/courses', verifyToken, getAllCoursesAdmin);
+router.get('/courses/:id', verifyToken, isAdmin, getCourseByIdAdmin);
+router.put('/courses/:id', verifyToken, isAdmin, updateCourse);
+router.delete('/courses/:id', verifyToken, isAdmin, deleteCourseAdmin);
+router.post('/courses/generate-slug', verifyToken, isAdmin, generateCourseSlug);
+router.post('/courses/validate', verifyToken, isAdmin, validateCourse);
 
-router.post('/admin/upload', verifyToken, isAdmin, upload.single('file'), uploadFile);
-router.post('/admin/upload/thumbnail', verifyToken, isAdmin, upload.single('thumbnail'), uploadThumbnail);
-router.get('/admin/music-notes', verifyToken, isAdmin, getAllMusicNotes);
-router.post('/admin/music-notes', verifyToken, isAdmin, createMusicNote);
-router.get('/admin/music-notes/:id', verifyToken, isAdmin, getMusicNoteById);
-router.put('/admin/music-notes/:id', verifyToken, isAdmin, updateMusicNote);
-router.delete('/admin/music-notes/:id', verifyToken, isAdmin, deleteMusicNote);
+router.post('/upload', verifyToken, isAdmin, upload.single('file'), uploadFile);
+router.post('/upload/thumbnail', verifyToken, isAdmin, upload.single('thumbnail'), uploadThumbnail);
+router.get('/music-notes', verifyToken, isAdmin, getAllMusicNotes);
+router.post('/music-notes', verifyToken, isAdmin, createMusicNote);
+router.get('/music-notes/:id', verifyToken, isAdmin, getMusicNoteById);
+router.put('/music-notes/:id', verifyToken, isAdmin, updateMusicNote);
+router.delete('/music-notes/:id', verifyToken, isAdmin, deleteMusicNote);
 
-router.get('/admin/users', verifyToken, isAdmin, getAllUsersAdmin);
-router.post('/admin/users', verifyToken, isAdmin, createUser);
-router.get('/admin/users/:id', verifyToken, isAdmin, getUserByIdAdmin);
-router.put('/admin/users/:id', verifyToken, isAdmin, updateUser);
-router.delete('/admin/users/:id', verifyToken, isAdmin, deleteUser);
-router.put('/admin/users/:id/status', verifyToken, isAdmin, updateUserStatus);
+router.get('/users', verifyToken, isAdmin, getAllUsersAdmin);
+router.post('/users', verifyToken, isAdmin, createUser);
+router.get('/users/:id', verifyToken, isAdmin, getUserByIdAdmin);
+router.put('/users/:id', verifyToken, isAdmin, updateUser);
+router.delete('/users/:id', verifyToken, isAdmin, deleteUser);
+router.put('/users/:id/status', verifyToken, isAdmin, updateUserStatus);
 
 
 export default router;

@@ -10,6 +10,10 @@ import CoursesPage from './CoursePage';
 import CourseDetailPage from './CourseDetailPage';
 import NotesPage from './NotesPage';
 import StudentsPage from './StudentPage';
+import UsersPage from './pages/UsersPage';
+
+// Services
+import { getUsers, createUser, deleteUser } from '../api/adminUserService';
 
 // Modals
 import CourseFormModal from './CourseModel';
@@ -18,7 +22,7 @@ import ModuleFormModal from './ModuleFormModal';
 import LessonFormModal from './LessonFormModal';
 
 const MainDashboardAdmin = () => {
-  const [activeTab, setActiveTab] = useState('courses');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [currentCourseView, setCurrentCourseView] = useState('list'); // 'list', 'detail'
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -53,6 +57,16 @@ const MainDashboardAdmin = () => {
   const [noteCategoryFilter, setNoteCategoryFilter] = useState('all');
   const [showNoteForm, setShowNoteForm] = useState(false);
   const [editingNote, setEditingNote] = useState(null); // ADDED THIS
+
+  // Users State (Admin User Management)
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState(null);
+  const [userSearch, setUserSearch] = useState('');
+  const [userStatusFilter, setUserStatusFilter] = useState('all');
+  const [userPlanFilter, setUserPlanFilter] = useState('all');
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [userFormLoading, setUserFormLoading] = useState(false);
 
   // Get axios config with auth headers
   const getAxiosConfig = () => {
@@ -94,6 +108,13 @@ const MainDashboardAdmin = () => {
     fetchCourses();
     fetchMusicNotes();
   }, []);
+
+  // Fetch users when users tab is active
+  useEffect(() => {
+    if (activeTab === 'users') {
+      fetchUsers();
+    }
+  }, [activeTab, userSearch, userStatusFilter, userPlanFilter]);
 
   // Dashboard APIs
   const fetchDashboardStats = async () => {
@@ -222,6 +243,71 @@ const MainDashboardAdmin = () => {
       } catch (error) {
         console.error('Error deleting music note:', error);
         alert('Error deleting music note. Please try again.');
+      }
+    }
+  };
+
+  // Admin User Management Handlers
+  const fetchUsers = async () => {
+    try {
+      setUsersLoading(true);
+      setUsersError(null);
+      
+      const filters = {};
+      if (userSearch) filters.search = userSearch;
+      if (userStatusFilter !== 'all') filters.status = userStatusFilter;
+      if (userPlanFilter !== 'all') filters.plan = userPlanFilter;
+      
+      const result = await getUsers(filters);
+      
+      if (result.success) {
+        setUsers(result.users);
+      } else {
+        setUsersError(result.message);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setUsersError('Failed to load users. Please try again.');
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  const handleCreateUser = async (userData) => {
+    try {
+      setUserFormLoading(true);
+      const result = await createUser(userData);
+      
+      if (result.success) {
+        await fetchUsers();
+        await fetchDashboardStats();
+        return { success: true, message: result.message };
+      } else {
+        return { success: false, message: result.message };
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
+      return { success: false, message: 'Failed to create user. Please try again.' };
+    } finally {
+      setUserFormLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      try {
+        const result = await deleteUser(userId);
+        
+        if (result.success) {
+          await fetchUsers();
+          await fetchDashboardStats();
+          alert('User deleted successfully!');
+        } else {
+          alert(result.message || 'Failed to delete user.');
+        }
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        alert('Error deleting user. Please try again.');
       }
     }
   };
@@ -450,6 +536,22 @@ const MainDashboardAdmin = () => {
         );
       case 'students':
         return <StudentsPage />;
+      case 'users':
+        return (
+          <UsersPage
+            users={users}
+            loading={usersLoading}
+            error={usersError}
+            search={userSearch}
+            setSearch={setUserSearch}
+            statusFilter={userStatusFilter}
+            setStatusFilter={setUserStatusFilter}
+            planFilter={userPlanFilter}
+            setPlanFilter={setUserPlanFilter}
+            onAddUser={() => setShowUserForm(true)}
+            onDeleteUser={handleDeleteUser}
+          />
+        );
       default:
         return <DashboardPage dashboardStats={dashboardStats} loading={loading} />;
     }

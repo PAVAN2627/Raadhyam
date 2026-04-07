@@ -15,31 +15,24 @@
 import express from 'express';
 import verifyToken from '../middlewares/AuthmiddleWare.js';
 import isAdmin from '../middlewares/isAdmin.js';
+import { 
+  getAllUsers, 
+  createNewUser, 
+  deleteUserById 
+} from '../controllers/UserManagementController.js';
 
 const router = express.Router();
 
 // GET /api/users - Get all users (admin only)
-router.get('/', verifyToken, isAdmin, (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'User listing endpoint not implemented yet'
-  });
-});
+// Returns users without password hash
+router.get('/', verifyToken, isAdmin, getAllUsers);
 
 // POST /api/users - Create user (admin only)
-router.post('/', verifyToken, isAdmin, (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'User creation endpoint not implemented yet'
-  });
-});
+// Validates input, checks duplicates, hashes password
+router.post('/', verifyToken, isAdmin, createNewUser);
 
 // DELETE /api/users/:id - Delete user (admin only)
-router.delete('/:id', verifyToken, isAdmin, (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'User deletion endpoint not implemented yet'
-  });
-});
+// Soft delete by setting status to "Deleted"
+router.delete('/:id', verifyToken, isAdmin, deleteUserById);
 
 export default router;

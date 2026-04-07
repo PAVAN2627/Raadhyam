@@ -29,6 +29,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
 
   const navigation = [
     { name: 'Dashboard', icon: LayoutDashboard, id: 'dashboard' },
+    { name: 'Users', icon: Users, id: 'users' },
     { name: 'Courses', icon: BookOpen, id: 'courses' },
     { name: 'Music Notes', icon: FileText, id: 'notes' },
     { name: 'Students', icon: Users, id: 'students' },

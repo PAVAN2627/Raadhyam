@@ -125,7 +125,7 @@ const LoginPage = () => {
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); setIsLoading(false); return; }
     try {
-      const res = await axios.post('/api/login/user', { email: formData.email.toLowerCase().trim(), password: formData.password });
+      const res = await axios.post('/api/auth/login', { email: formData.email.toLowerCase().trim(), password: formData.password });
       if (res.data.success) {
         setSuccessMessage('Login successful! Redirecting...');
         if (res.data.token) localStorage.setItem('authToken', res.data.token);
