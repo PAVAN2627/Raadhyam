@@ -51,3 +51,4 @@ Backend/uploads/
 *.local
 .cache/
 .parcel-cache/
+API_ENDPOINTS.md
