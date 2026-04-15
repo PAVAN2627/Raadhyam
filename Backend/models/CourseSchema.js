@@ -44,7 +44,7 @@ ModuleSchema.pre("save", function (next) {
 
 /* ------------------------- Instructor Subdocument ------------------------- */
 const InstructorSchema = new Schema({
-  name: { type: String},
+  name: { type: String },
   bio: { type: String },
   email: { type: String },
   socialLinks: {
@@ -114,8 +114,7 @@ const CourseSchema = new Schema({
 });
 
 // Indexes for efficient querying
-CourseSchema.index({ slug: 1 });
-CourseSchema.index({ category: 1 });
+// Note: slug and category are already indexed via field definitions
 CourseSchema.index({ "instructor.name": 1 });
 CourseSchema.index({ createdAt: -1 });
 CourseSchema.index({ "stats.rating": -1 });

@@ -313,7 +313,7 @@ const LoginPage = () => {
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
               <div className="auth-field">
-                <label style={labelStyle}>Name/Email</label>
+                <label style={labelStyle}>Email Address</label>
                 <input
                   className="auth-input"
                   type="email"

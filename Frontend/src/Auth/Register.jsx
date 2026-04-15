@@ -59,7 +59,7 @@ const RegisterPage = () => {
     if (!formData.email) e.email = 'Email is required';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) e.email = 'Enter a valid email';
     if (!formData.password) e.password = 'Password is required';
-    else if (formData.password.length < 6) e.password = 'Minimum 6 characters';
+    else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/.test(formData.password)) e.password = 'At least 8 chars, 1 letter, 1 number';
     if (!formData.confirmPassword) e.confirmPassword = 'Please confirm your password';
     else if (formData.password !== formData.confirmPassword) e.confirmPassword = 'Passwords do not match';
     if (!userCaptcha) e.captcha = 'CAPTCHA is required';
@@ -84,7 +84,7 @@ const RegisterPage = () => {
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Registration failed. Please try again.';
-      if (err.response?.status === 409) setErrors({ email: 'This email is already registered.' });
+      if (err.response?.status === 409 || msg.includes('Email already exists') || err.response?.data?.message === 'Email or username already exists') { setErrors({ email: 'This email is already registered.' }); }
       else if (err.response?.data?.field) setErrors({ [err.response.data.field]: msg });
       else setErrors({ general: msg });
       generateCaptcha(); setUserCaptcha('');
@@ -284,7 +284,7 @@ const RegisterPage = () => {
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      placeholder="Min 6 chars"
+                      placeholder="Min 8 chars"
                       style={{ ...inputStyle('password'), paddingRight: 32 }}
                       onFocus={() => setFocused('password')}
                       onBlur={() => setFocused('')}

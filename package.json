@@ -1,0 +1,14 @@
+{
+  "name": "raadhyam-fullstack",
+  "version": "1.0.0",
+  "description": "Production-ready root package for deploying Frontend and Backend",
+  "scripts": {
+    "postinstall": "cd Backend && npm install && cd ../Frontend && npm install",
+    "build": "cd Frontend && npm run build",
+    "start": "cd Backend && npm run prod",
+    "dev": "cd Backend && npm run dev & cd Frontend && npm run dev"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
